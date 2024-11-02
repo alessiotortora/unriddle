@@ -8,12 +8,12 @@ import { pgTable, text, uuid, varchar } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
 
 export const spaces = pgTable('spaces', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  name: varchar('name', { length: 256 }).notNull(),
-  userId: uuid('user_id')
+  id: uuid().primaryKey().notNull().defaultRandom(),
+  name: varchar({ length: 256 }).notNull(),
+  userId: uuid()
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  description: text('description'),
+  description: text(),
   createdAt,
   updatedAt,
 });

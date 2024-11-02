@@ -4,10 +4,10 @@ import { pgTable, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
 
 export const videosToContent = pgTable('videos_to_content', {
-  videoId: uuid('video_id')
+  videoId: uuid()
     .notNull()
     .references(() => videos.id, { onDelete: 'cascade' }),
-  contentId: uuid('content_id')
+  contentId: uuid()
     .notNull()
     .references(() => content.id, { onDelete: 'cascade' }),
 });

@@ -29,21 +29,21 @@ export const eventStatusEnum = pgEnum('event_status', [
 ]);
 
 export const events = pgTable('events', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  title: varchar('title', { length: 256 }).notNull(),
-  description: text('description'),
-  startDate: timestamp('start_date').notNull(),
-  endDate: timestamp('end_date'),
-  location: varchar('location', { length: 256 }),
-  client: varchar('client', { length: 256 }),
-  link: varchar('link', { length: 512 }),
+  id: uuid().primaryKey().notNull().defaultRandom(),
+  title: varchar({ length: 256 }).notNull(),
+  description: text(),
+  startDate: timestamp().notNull(),
+  endDate: timestamp(),
+  location: varchar({ length: 256 }),
+  client: varchar({ length: 256 }),
+  link: varchar({ length: 512 }),
   type: eventTypeEnum().default('other'),
   status: eventStatusEnum().default('draft'),
-  details: jsonb('details'),
-  coverImageId: uuid('cover_image_id').references(() => images.id, {
+  details: jsonb(),
+  coverImageId: uuid().references(() => images.id, {
     onDelete: 'set null',
   }),
-  spaceId: uuid('space_id')
+  spaceId: uuid()
     .notNull()
     .references(() => spaces.id, { onDelete: 'cascade' }),
   createdAt,

@@ -4,12 +4,12 @@ import { boolean, integer, jsonb, pgTable, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
 
 export const projects = pgTable('projects', {
-  contentId: uuid('content_id')
+  contentId: uuid()
     .primaryKey()
     .references(() => content.id, { onDelete: 'cascade' }),
-  year: integer('year'),
-  featured: boolean('featured').default(false),
-  details: jsonb('details'),
+  year: integer(),
+  featured: boolean().default(false),
+  details: jsonb(),
   createdAt,
   updatedAt,
 });

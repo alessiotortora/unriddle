@@ -6,13 +6,13 @@ import { jsonb, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
 
 export const images = pgTable('images', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
-  alt: varchar('alt', { length: 256 }),
-  publicId: varchar('public_id', { length: 512 }).notNull(),
-  url: varchar('url', { length: 512 }).notNull(),
-  resolution: jsonb('resolution'),
-  format: varchar('format', { length: 256 }),
+  id: uuid().primaryKey().notNull().defaultRandom(),
+  userId: uuid().references(() => users.id, { onDelete: 'cascade' }),
+  alt: varchar({ length: 256 }),
+  publicId: varchar({ length: 512 }).notNull(),
+  url: varchar({ length: 512 }).notNull(),
+  resolution: jsonb(),
+  format: varchar({ length: 256 }),
   createdAt,
   updatedAt,
 });

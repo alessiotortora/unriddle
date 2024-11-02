@@ -17,19 +17,19 @@ export const contentStatusEnum = pgEnum('content_status', [
 ]);
 
 export const content = pgTable('content', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  spaceId: uuid('space_id')
+  id: uuid().primaryKey().notNull().defaultRandom(),
+  spaceId: uuid()
     .notNull()
     .references(() => spaces.id, { onDelete: 'cascade' }),
-  title: varchar('title', { length: 256 }).notNull(),
-  description: text('description'),
+  title: varchar({ length: 256 }).notNull(),
+  description: text(),
   contentType: contentTypeEnum().notNull().default('project'),
-  tags: text('tags').array(),
+  tags: text().array(),
   status: contentStatusEnum().default('draft'),
-  coverImageId: uuid('cover_image_id').references(() => images.id, {
+  coverImageId: uuid().references(() => images.id, {
     onDelete: 'set null',
   }),
-  coverVideoId: uuid('cover_video_id').references(() => videos.id, {
+  coverVideoId: uuid().references(() => videos.id, {
     onDelete: 'set null',
   }),
   createdAt,

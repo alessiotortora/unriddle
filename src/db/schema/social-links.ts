@@ -4,17 +4,17 @@ import { pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
 
 export const socialLinks = pgTable('social_links', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  userId: uuid('user_id')
+  id: uuid().primaryKey().notNull().defaultRandom(),
+  userId: uuid()
     .notNull()
     .unique()
     .references(() => users.id, { onDelete: 'cascade' }),
-  twitter: varchar('twitter', { length: 256 }),
-  github: varchar('github', { length: 256 }),
-  instagram: varchar('instagram', { length: 256 }),
-  linkedin: varchar('linkedin', { length: 256 }),
-  website: varchar('website', { length: 256 }),
-  other: varchar('other', { length: 256 }),
+  twitter: varchar({ length: 256 }),
+  github: varchar({ length: 256 }),
+  instagram: varchar({ length: 256 }),
+  linkedin: varchar({ length: 256 }),
+  website: varchar({ length: 256 }),
+  other: varchar({ length: 256 }),
   createdAt,
   updatedAt,
 });

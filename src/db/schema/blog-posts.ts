@@ -4,11 +4,11 @@ import { pgTable, text, uuid, varchar } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
 
 export const blogPosts = pgTable('blog_posts', {
-  contentId: uuid('content_id')
+  contentId: uuid()
     .primaryKey()
     .references(() => content.id, { onDelete: 'cascade' }),
-  author: varchar('author', { length: 256 }),
-  body: text('body').notNull(),
+  author: varchar({ length: 256 }),
+  body: text().notNull(),
   createdAt,
   updatedAt,
 });

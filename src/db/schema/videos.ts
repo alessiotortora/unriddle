@@ -11,13 +11,13 @@ export const videoStatusEnum = pgEnum('video_status', [
 ]);
 
 export const videos = pgTable('videos', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
-  alt: varchar('alt', { length: 256 }),
-  assetId: varchar('asset_id', { length: 512 }),
-  playbackId: varchar('playback_id', { length: 512 }),
+  id: uuid().primaryKey().notNull().defaultRandom(),
+  userId: uuid().references(() => users.id, { onDelete: 'cascade' }),
+  alt: varchar({ length: 256 }),
+  assetId: varchar({ length: 512 }),
+  playbackId: varchar({ length: 512 }),
   status: videoStatusEnum().default('processing'),
-  identifier: varchar('identifier', { length: 512 }).unique(),
+  identifier: varchar({ length: 512 }).unique(),
   createdAt,
   updatedAt,
 });

@@ -9,13 +9,13 @@ import { relations } from 'drizzle-orm/relations';
 export const roleEnum = pgEnum('role', ['guest', 'user', 'admin']);
 
 export const users = pgTable('users', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  id: uuid().primaryKey().notNull().defaultRandom(),
   role: roleEnum().default('user'),
-  firstName: varchar('first_name', { length: 256 }),
-  lastName: varchar('last_name', { length: 256 }),
-  location: varchar('location', { length: 256 }),
-  bio: text('bio'),
-  email: varchar('email', { length: 256 }).unique(),
+  firstName: varchar({ length: 256 }),
+  lastName: varchar({ length: 256 }),
+  location: varchar({ length: 256 }),
+  bio: text(),
+  email: varchar({ length: 256 }).unique(),
   createdAt,
   updatedAt,
 });
