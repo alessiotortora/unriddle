@@ -3,10 +3,10 @@
 import { createClient } from '@/utils/supabase/server';
 
 export async function SignInWithMagicLink(email: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   try {
-    const { data, error } = await (await supabase).auth.signInWithOtp({
+    const { data, error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         shouldCreateUser: false,

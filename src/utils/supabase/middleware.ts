@@ -38,6 +38,16 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (user && request.nextUrl.pathname === '/login') {
+    const dashboardUrl = request.nextUrl.clone();
+    dashboardUrl.pathname = '/dashboard'; // Set to the desired post-login route
+    return NextResponse.redirect(dashboardUrl);
+  }
+
+  // Allow both authenticated and unauthenticated users to access the root
+  if (request.nextUrl.pathname === '/') {
+    return supabaseResponse;
+  }
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
