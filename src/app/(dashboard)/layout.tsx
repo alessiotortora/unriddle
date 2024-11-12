@@ -20,7 +20,7 @@ export default async function DashboardLayout({
   return (
     <SidebarProvider defaultOpen={true}>
       <AppSidebar />
-      <main>
+      <main className="w-full flex-1 overflow-hidden">
         <header className="flex h-16 w-screen shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
