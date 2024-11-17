@@ -1,21 +1,24 @@
+import { Button } from '@/components/ui/button';
+
 function Hero() {
   return (
-    <div className="rounded-lg bg-white p-8 shadow-lg">
-      <h1 className="mb-4 text-3xl font-bold">
-        The better way to schedule your meetings
+    <section className="rounded-lg bg-background p-12 text-center shadow-sm">
+      <h1 className="text-4xl font-bold text-foreground">
+        The Open-Source CMS for Everyone
       </h1>
-      <p className="text-gray-600">
-        A seamless, fully customizable scheduling experience...
+      <p className="mt-4 text-lg text-muted-foreground">
+        Manage blogs, portfolios, shops, and more with ease. Free, minimal, and
+        multi-tenant.
       </p>
-      <div className="mt-6 flex gap-4">
-        <button className="rounded-md bg-black px-4 py-2 text-white">
-          Sign up with Google
-        </button>
-        <button className="rounded-md bg-gray-200 px-4 py-2 text-black">
-          Sign up with email
-        </button>
+      <div className="mt-6 flex justify-center gap-4">
+        <Button asChild>
+          <a href="/get-started">Get Started</a>
+        </Button>
+        <Button asChild variant="outline">
+          <a href="https://github.com/your-repo">View on GitHub</a>
+        </Button>
       </div>
-    </div>
+    </section>
   );
 }
 

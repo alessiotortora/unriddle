@@ -1,6 +1,9 @@
 import { SectionDivider } from '@/components/ui/section-divider';
 
+import Features from './_components/features';
 import Hero from './_components/hero';
+import HowItWorks from './_components/how-it-works';
+import WhatYouCanBuild from './_components/what-you-can-build';
 
 export default function HomePage() {
   return (
@@ -8,8 +11,8 @@ export default function HomePage() {
       {/* Vertical Lines Container - always visible */}
       <div className="pointer-events-none fixed inset-0 flex justify-center">
         <div className="mx-auto flex w-full max-w-6xl justify-between px-4 sm:px-6">
-          <div className="w-px bg-gray-300"></div>
-          <div className="w-px bg-gray-300"></div>
+          <div className="w-px bg-border"></div>
+          <div className="w-px bg-border"></div>
         </div>
       </div>
 
@@ -21,16 +24,17 @@ export default function HomePage() {
         <SectionDivider />
 
         <section className="p-6">
-          <div className="rounded-md bg-gray-100 p-4 shadow-md">
-            Section 1 content
-          </div>
+          <WhatYouCanBuild />
         </section>
         <SectionDivider />
 
         <section className="p-6">
-          <div className="rounded-md bg-gray-100 p-4 shadow-md">
-            Section 2 content
-          </div>
+          <HowItWorks />
+        </section>
+        <SectionDivider />
+
+        <section className="p-6">
+          <Features />
         </section>
       </div>
     </>
