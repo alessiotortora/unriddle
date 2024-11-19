@@ -7,15 +7,14 @@ import { VariantProps, cva } from 'class-variance-authority';
 import { PanelLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerTitle,
-} from '@/components/ui/drawer';
-
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tooltip,
@@ -29,7 +28,7 @@ import { cn } from '@/lib/utils';
 const SIDEBAR_COOKIE_NAME = 'sidebar:state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = '16rem';
-const SIDEBAR_WIDTH_MOBILE = '100%';
+const SIDEBAR_WIDTH_MOBILE = '18rem';
 const SIDEBAR_WIDTH_ICON = '3rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
@@ -209,8 +208,8 @@ const Sidebar = React.forwardRef<
 
     if (isMobile) {
       return (
-        <Drawer open={openMobile} onOpenChange={setOpenMobile}>
-          <DrawerContent
+        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+          <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
             className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
@@ -219,12 +218,13 @@ const Sidebar = React.forwardRef<
                 '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
               } as React.CSSProperties
             }
+            side={side}
           >
-            <DrawerTitle className="sr-only">Sheet</DrawerTitle>
-            <DrawerDescription className="sr-only">Sheet</DrawerDescription>
+            <SheetTitle className="sr-only" />
+            <SheetDescription className="sr-only" />
             <div className="flex h-full w-full flex-col">{children}</div>
-          </DrawerContent>
-        </Drawer>
+          </SheetContent>
+        </Sheet>
       );
     }
 
