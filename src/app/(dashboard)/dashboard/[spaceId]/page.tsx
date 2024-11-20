@@ -7,6 +7,7 @@ import { useDialog } from '@/hooks/use-dialog';
 
 export default function DashboardPage() {
   const { dialogType, onOpen, onClose } = useDialog();
+
   return (
     <PageContainer scrollable>
       <ProjectModal

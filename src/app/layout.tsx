@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 
 import { ThemeProvider } from '@/components/providers/theme-provider';
+import UserProvider from '@/components/providers/user-provider';
 import { Toaster } from '@/components/ui/sonner';
+import { getUser } from '@/lib/actions/get-user';
 
 import './globals.css';
 
@@ -10,11 +12,13 @@ export const metadata: Metadata = {
   description: 'by unriddle',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getUser();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
@@ -24,7 +28,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <UserProvider initialUser={user}>{children}</UserProvider>
           <Toaster />
         </ThemeProvider>
       </body>

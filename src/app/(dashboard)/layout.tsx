@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { db } from '@/db';
+import { users } from '@/db/schema/users';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -38,6 +40,7 @@ export default async function DashboardLayout({
             </BreadcrumbList>
           </Breadcrumb>
         </header>
+
         {children}
       </main>
     </SidebarProvider>
