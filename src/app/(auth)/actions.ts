@@ -28,3 +28,24 @@ export async function SignInWithMagicLink(email: string) {
     };
   }
 }
+
+export async function SignOut() {
+  const supabase = await createClient();
+
+  try {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('Error signing out:', error.message);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Unexpected error during sign-out:', err);
+    return {
+      success: false,
+      error: 'An unexpected error occurred. Please try again.',
+    };
+  }
+}

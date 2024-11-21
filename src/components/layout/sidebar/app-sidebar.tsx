@@ -27,6 +27,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useUser } from '@/hooks/use-user';
 
 import { NavSecondary } from './nav-secondary';
 import { NavUser } from './nav-user';
@@ -106,13 +107,7 @@ export function AppSidebar() {
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser
-          user={{
-            name: 'alessio',
-            email: 'alessiotortora@gmail.com',
-            avatar: '',
-          }}
-        />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

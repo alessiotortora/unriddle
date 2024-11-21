@@ -1,25 +1,27 @@
-import { InferModel } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 import { db } from '@/db';
-import { users } from '@/db/schema';
+import { User, users } from '@/db/schema';
 import { createClient } from '@/utils/supabase/server';
 
-type DbUser = InferModel<typeof users>; // Automatically infers the model type
-
-export async function getUser(): Promise<DbUser | null> {
+export async function getUser(): Promise<User | null> {
   const supabase = await createClient();
   const {
-    data: { user },
+    data: { user: authUser },
     error,
   } = await supabase.auth.getUser();
 
-  if (error || !user) return null;
+  if (error || !authUser) return null;
 
-  const dbUser = await db
+  const user = await db
     .select()
     .from(users)
-    .where(eq(users.id, user.id))
+    .where(eq(users.id, authUser.id))
     .limit(1);
 
-  return dbUser[0] ?? null;
+  if (user.length === 0) {
+    return null;
+  }
+
+  return user[0];
 }

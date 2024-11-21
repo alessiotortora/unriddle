@@ -2,13 +2,11 @@
 
 import { useEffect } from 'react';
 
-import { users } from '@/db/schema';
+import { User } from '@/db/schema';
 import { useUser } from '@/hooks/use-user';
 
-// Updated to reflect the Zustand store location
-
 interface UserProviderProps {
-  initialUser: users | null;
+  initialUser: User | null;
   children: React.ReactNode;
 }
 
@@ -17,11 +15,11 @@ export function UserProvider({ children, initialUser }: UserProviderProps) {
 
   useEffect(() => {
     if (initialUser) {
-      setUser(initialUser); // Set user in Zustand
+      setUser(initialUser);
     } else {
-      resetUser(); // Reset user if initialUser is null
+      resetUser();
     }
-  }, [initialUser, setUser, resetUser]);
+  }, [initialUser]);
 
   return <>{children}</>;
 }
