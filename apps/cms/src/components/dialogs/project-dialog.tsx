@@ -20,9 +20,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { createProject } from '@/lib/actions/create/create-project';
 
 const formSchema = z.object({
-  name: z.string().min(1),
+  title: z.string().min(1),
 });
 
 interface ProjectModalProps {
@@ -47,43 +48,39 @@ export const ProjectModal = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
+      title: '',
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const spaceId = params.spaceId as string;
+    if (!spaceId) {
+      toast.error('Store ID is required');
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await fetch(`/api/${params.storeId}/projects`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
+      const response = await createProject({
+        title: values.title,
+        spaceId: spaceId,
       });
 
-      console.log(response);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to create project');
       }
+      console.log(response.data);
 
-      const data = await response.json();
-      router.push(`/${params.storeId}/projects/${data.id}`);
-      router.refresh();
+      toast.success('Project created successfully');
       onClose();
+      router.refresh();
+      router.push(`/dashboard/${spaceId}/projects/${response.data.id}`);
     } catch (error) {
-      toast('error');
+      toast.error('Failed to create project');
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) return null;
 
   return (
     <BaseDialog
@@ -97,10 +94,10 @@ export const ProjectModal = ({
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
-              name="name"
+              name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Title</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}

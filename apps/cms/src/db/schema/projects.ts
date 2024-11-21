@@ -1,7 +1,9 @@
-import { content } from './content';
-import { createdAt, updatedAt } from '@/utils/common-fields';
 import { boolean, integer, jsonb, pgTable, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
+
+import { createdAt, updatedAt } from '@/utils/common-fields';
+
+import { content } from './content';
 
 export const projects = pgTable('projects', {
   contentId: uuid()
@@ -20,3 +22,6 @@ export const projectsRelations = relations(projects, ({ one }) => ({
     references: [content.id],
   }),
 }));
+
+export type Project = typeof projects.$inferSelect;
+export type NewProject = typeof projects.$inferInsert;

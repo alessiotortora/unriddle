@@ -1,5 +1,4 @@
 import { eq } from 'drizzle-orm';
-
 import { db } from '@/db';
 import { User, users } from '@/db/schema';
 import { createClient } from '@/utils/supabase/server';

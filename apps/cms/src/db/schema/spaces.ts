@@ -1,11 +1,13 @@
+import { pgTable, text, uuid, varchar } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm/relations';
+
+import { createdAt, updatedAt } from '@/utils/common-fields';
+
 import { events } from './events';
 import { images } from './images';
 import { projects } from './projects';
 import { users } from './users';
 import { videos } from './videos';
-import { createdAt, updatedAt } from '@/utils/common-fields';
-import { pgTable, text, uuid, varchar } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm/relations';
 
 export const spaces = pgTable('spaces', {
   id: uuid().primaryKey().notNull().defaultRandom(),
@@ -24,3 +26,6 @@ export const spacesRelations = relations(spaces, ({ many }) => ({
   videos: many(videos),
   images: many(images),
 }));
+
+export type Space = typeof spaces.$inferSelect;
+export type NewSpace = typeof spaces.$inferInsert;

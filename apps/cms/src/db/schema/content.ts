@@ -35,3 +35,6 @@ export const content = pgTable('content', {
   createdAt,
   updatedAt,
 });
+
+export type Content = typeof content.$inferSelect;
+export type NewContent = typeof content.$inferInsert;
