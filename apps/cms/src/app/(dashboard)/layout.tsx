@@ -12,10 +12,12 @@ export default async function DashboardLayout({
   return (
     <SidebarProvider defaultOpen={true}>
       <AppSidebar />
-      <main className="w-full flex-1 overflow-hidden">
+      <div className="w-full">
         <Header />
-        {children}
-      </main>
+        <main className="mt-16 h-screen w-full flex-1 overflow-hidden border border-red-500">
+          {children}
+        </main>
+      </div>
     </SidebarProvider>
   );
 }

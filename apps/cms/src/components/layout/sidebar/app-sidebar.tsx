@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 
 import {
@@ -27,7 +29,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { useUser } from '@/hooks/use-user';
+import { useDialog } from '@/hooks/use-dialog';
 
 import { NavSecondary } from './nav-secondary';
 import { NavUser } from './nav-user';
@@ -54,6 +56,7 @@ const navSecondary = [
 ];
 
 export function AppSidebar() {
+  const { onOpen } = useDialog();
   return (
     <Sidebar collapsible="icon" side="left" variant="sidebar">
       <SidebarHeader>
@@ -61,7 +64,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <GalleryVerticalEnd className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
@@ -100,7 +103,10 @@ export function AppSidebar() {
         </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <SidebarGroupAction title="Add project">
+          <SidebarGroupAction
+            title="Add project"
+            onClick={() => onOpen('project')}
+          >
             <Plus /> <span className="sr-only">Add Project</span>
           </SidebarGroupAction>
         </SidebarGroup>

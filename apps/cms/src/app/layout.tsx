@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { DialogProvider } from '@/components/providers/dialog-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import UserProvider from '@/components/providers/user-provider';
 import { Toaster } from '@/components/ui/sonner';
@@ -21,7 +22,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body className="overflow-hidden">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -29,6 +30,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <UserProvider initialUser={user}>{children}</UserProvider>
+          <DialogProvider />
           <Toaster />
         </ThemeProvider>
       </body>

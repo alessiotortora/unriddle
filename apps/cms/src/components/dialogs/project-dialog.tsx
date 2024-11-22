@@ -34,13 +34,12 @@ interface ProjectModalProps {
   description: string;
 }
 
-export const ProjectModal = ({
+export const ProjectDialog = ({
   isOpen,
   onClose,
   title,
   description,
 }: ProjectModalProps) => {
-  const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const params = useParams();
