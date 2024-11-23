@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type DialogType = 'store' | 'project' | null;
+type DialogType = 'store' | 'project' | 'settings' | null;
 
 interface DialogState {
   dialogType: DialogType;

@@ -6,10 +6,7 @@ import { db } from '@/db';
 import { content, contentTypeEnum } from '@/db/schema';
 import { projects } from '@/db/schema/projects';
 
-export async function createProject(formData: {
-  title: string;
-  spaceId: string;
-}) {
+export async function createProject(formData: { spaceId: string }) {
   try {
     // Start a transaction to ensure both operations succeed or fail together
     const result = await db.transaction(async (tx) => {
@@ -17,7 +14,6 @@ export async function createProject(formData: {
       const [contentResult] = await tx
         .insert(content)
         .values({
-          title: formData.title,
           spaceId: formData.spaceId,
           contentType: contentTypeEnum.enumValues[0],
         })

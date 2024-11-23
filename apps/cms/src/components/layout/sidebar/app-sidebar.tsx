@@ -22,9 +22,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Content } from '@/db/schema';
 import { Project } from '@/db/schema/projects';
+import { useDialog } from '@/hooks/use-dialog';
 
 import { NavProjects } from './nav-projects';
 import { NavSecondary } from './nav-secondary';
@@ -32,7 +34,6 @@ import { NavUser } from './nav-user';
 
 const items = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboardIcon },
-  { title: 'Settings', url: '/dashboard/settings', icon: Settings },
 ];
 
 const navSecondary = [
@@ -47,12 +48,18 @@ const navSecondary = [
     icon: Send,
   },
 ];
+const settingsItem = {
+  title: 'Settings',
+  icon: Settings,
+};
 
 interface AppSidebarProps {
-  projects: (Project & { content: Content })[];
+  projects: (Project & { content: Content })[] | [];
 }
 
 export function AppSidebar({ projects }: AppSidebarProps) {
+  const { onOpen } = useDialog();
+  const { open } = useSidebar();
   return (
     <Sidebar collapsible="icon" side="left" variant="sidebar">
       <SidebarHeader>
@@ -79,7 +86,10 @@ export function AppSidebar({ projects }: AppSidebarProps) {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton
+                    tooltip={{ children: item.title, hidden: open }}
+                    asChild
+                  >
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -87,13 +97,22 @@ export function AppSidebar({ projects }: AppSidebarProps) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip={{ children: settingsItem.title, hidden: open }}
+                  onClick={() => onOpen('settings')}
+                >
+                  <settingsItem.icon />
+                  <span>{settingsItem.title}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem></SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
         <NavProjects
           projects={projects.map((project) => ({
-            name: project.content.title,
+            name: project.content.title?.trim() || 'New project',
             url: `/dashboard/${project.content.spaceId}/projects/${project.contentId}`,
             icon: File,
           }))}

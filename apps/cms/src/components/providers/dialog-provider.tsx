@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useDialog } from '@/hooks/use-dialog';
 
 import { ProjectDialog } from '../dialogs/project-dialog';
+import { SettingsDialog } from '../dialogs/settings-dialog';
 
 export const DialogProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -18,12 +19,7 @@ export const DialogProvider = () => {
 
   return (
     <>
-      <ProjectDialog
-        isOpen={dialogType === 'project'}
-        onClose={onClose}
-        title={'test'}
-        description={'test'}
-      />
+      <SettingsDialog isOpen={dialogType === 'settings'} onClose={onClose} />
     </>
   );
 };

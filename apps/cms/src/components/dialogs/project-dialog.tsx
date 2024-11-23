@@ -57,7 +57,7 @@ export const ProjectDialog = ({
     onCancel?.() || onClose();
   };
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async () => {
     const spaceId = params.spaceId as string;
     if (!spaceId) {
       toast.error('Store ID is required');
@@ -67,7 +67,6 @@ export const ProjectDialog = ({
     try {
       setLoading(true);
       const response = await createProject({
-        title: values.title,
         spaceId: spaceId,
       });
 

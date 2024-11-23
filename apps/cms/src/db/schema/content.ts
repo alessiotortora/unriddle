@@ -21,7 +21,7 @@ export const content = pgTable('content', {
   spaceId: uuid()
     .notNull()
     .references(() => spaces.id, { onDelete: 'cascade' }),
-  title: varchar({ length: 256 }).notNull(),
+  title: varchar({ length: 256 }),
   description: text(),
   contentType: contentTypeEnum().notNull().default('project'),
   tags: text().array(),

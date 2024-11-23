@@ -1,5 +1,7 @@
 'use client';
 
+import { useParams, useRouter } from 'next/navigation';
+
 import {
   Folder,
   Forward,
@@ -8,6 +10,7 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import {
   DropdownMenu,
@@ -26,29 +29,56 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { useDialog } from '@/hooks/use-dialog';
+import { createProject } from '@/lib/actions/create/create-project';
 
 export function NavProjects({
   projects,
 }: {
-  projects: {
-    name: string;
-    url: string;
-    icon: LucideIcon;
-  }[];
+  projects:
+    | {
+        name: string;
+        url: string;
+        icon: LucideIcon;
+      }[]
+    | [];
 }) {
   const { isMobile } = useSidebar();
-  const { onOpen } = useDialog();
+  const params = useParams();
+  const router = useRouter();
+
+  const handleCreateProject = async () => {
+    const spaceId = params.spaceId as string;
+    if (!spaceId) {
+      toast.error('Space ID is required');
+      return;
+    }
+
+    try {
+      const response = await createProject({
+        spaceId: spaceId,
+      });
+
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Failed to create project');
+      }
+
+      toast.success('Project created successfully');
+      router.refresh();
+      router.push(`/dashboard/${spaceId}/projects/${response.data.id}`);
+    } catch (error) {
+      toast.error('Failed to create project');
+    }
+  };
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
-      <SidebarGroupAction title="Add project" onClick={() => onOpen('project')}>
+      <SidebarGroupAction title="Add project" onClick={handleCreateProject}>
         <Plus /> <span className="sr-only">Add Project</span>
       </SidebarGroupAction>
       <SidebarMenu>
         {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
+          <SidebarMenuItem key={item.url}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
                 <item.icon />
