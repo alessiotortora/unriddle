@@ -23,13 +23,13 @@ import { Input } from '@/components/ui/input';
 import { createProject } from '@/lib/actions/create/create-project';
 
 const formSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1, 'Title is required'),
 });
 
 interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm?: () => void;
+  onCancel?: () => void;
   title: string;
   description: string;
 }
@@ -37,6 +37,7 @@ interface ProjectModalProps {
 export const ProjectDialog = ({
   isOpen,
   onClose,
+  onCancel,
   title,
   description,
 }: ProjectModalProps) => {
@@ -50,6 +51,11 @@ export const ProjectDialog = ({
       title: '',
     },
   });
+
+  const handleCancel = () => {
+    form.reset();
+    onCancel?.() || onClose();
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const spaceId = params.spaceId as string;
@@ -68,7 +74,6 @@ export const ProjectDialog = ({
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Failed to create project');
       }
-      console.log(response.data);
 
       toast.success('Project created successfully');
       onClose();
@@ -86,7 +91,7 @@ export const ProjectDialog = ({
       title={title}
       description={description}
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleCancel}
     >
       <div className="space-y-4 py-2 pb-4">
         <Form {...form}>
@@ -109,7 +114,12 @@ export const ProjectDialog = ({
               )}
             />
             <div className="flex items-center justify-end space-x-2 pt-6">
-              <Button disabled={loading} variant="outline" onClick={onClose}>
+              <Button
+                disabled={loading}
+                variant="outline"
+                onClick={handleCancel}
+                type="button"
+              >
                 Cancel
               </Button>
               <Button disabled={loading} type="submit">

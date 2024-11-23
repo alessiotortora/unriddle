@@ -6,7 +6,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 
 interface BaseDialogProps {
@@ -32,7 +31,6 @@ export const BaseDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onChange}>
-      <DialogTrigger></DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

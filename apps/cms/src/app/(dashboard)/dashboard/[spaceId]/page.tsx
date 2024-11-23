@@ -1,15 +1,17 @@
-'use client';
-
 import PageContainer from '@/components/layout/page-container';
+import { getProjects } from '@/lib/actions/get/get-projects';
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const projects = await getProjects();
+  console.log(projects);
   return (
     <PageContainer scrollable>
-      <h1 className="h-[500px] border border-blue-500">Dashboard</h1>
-      <h1 className="h-[500px] border border-blue-500">Dashboard</h1>
-      <h1 className="h-[500px] border border-blue-500">Dashboard</h1>
-      <h1 className="h-[500px] border border-blue-500">Dashboard</h1>
-      hello
+      <h1>All projects</h1>
+      <ul>
+        {projects.map((project) => (
+          <li key={project.contentId}>{project.content.title}</li>
+        ))}
+      </ul>
     </PageContainer>
   );
 }

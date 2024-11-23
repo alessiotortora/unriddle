@@ -4,23 +4,38 @@ import { revalidatePath } from 'next/cache';
 
 import { db } from '@/db';
 import { content, contentTypeEnum } from '@/db/schema';
+import { projects } from '@/db/schema/projects';
 
 export async function createProject(formData: {
   title: string;
   spaceId: string;
 }) {
   try {
-    const result = await db
-      .insert(content)
-      .values({
-        title: formData.title,
-        spaceId: formData.spaceId,
-        contentType: contentTypeEnum.enumValues[0],
-      })
-      .returning({ id: content.id });
+    // Start a transaction to ensure both operations succeed or fail together
+    const result = await db.transaction(async (tx) => {
+      // Create content first
+      const [contentResult] = await tx
+        .insert(content)
+        .values({
+          title: formData.title,
+          spaceId: formData.spaceId,
+          contentType: contentTypeEnum.enumValues[0],
+        })
+        .returning({ id: content.id });
+
+      // Create project using the content id
+      await tx.insert(projects).values({
+        contentId: contentResult.id,
+        year: new Date().getFullYear(), // Default to current year
+        featured: false,
+        details: {},
+      });
+
+      return contentResult;
+    });
 
     revalidatePath(`/${formData.spaceId}/projects`);
-    return { success: true, data: result[0] };
+    return { success: true, data: result };
   } catch (error) {
     console.error('Failed to create project:', error);
     return { success: false, error: 'Failed to create project' };

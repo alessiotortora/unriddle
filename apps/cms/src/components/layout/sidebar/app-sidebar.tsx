@@ -3,14 +3,10 @@
 import Link from 'next/link';
 
 import {
-  Calendar,
+  File,
   GalleryVerticalEnd,
-  Home,
-  Inbox,
+  LayoutDashboardIcon,
   LifeBuoy,
-  MoreHorizontal,
-  Plus,
-  Search,
   Send,
   Settings,
 } from 'lucide-react';
@@ -20,26 +16,23 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { useDialog } from '@/hooks/use-dialog';
+import { Content } from '@/db/schema';
+import { Project } from '@/db/schema/projects';
 
+import { NavProjects } from './nav-projects';
 import { NavSecondary } from './nav-secondary';
 import { NavUser } from './nav-user';
 
 const items = [
-  { title: 'Home', url: '/dashboard', icon: Home },
-  { title: 'Inbox', url: '/store', icon: Inbox },
-  { title: 'Calendar', url: '#', icon: Calendar },
-  { title: 'Search', url: '#', icon: Search },
-  { title: 'Settings', url: '#', icon: Settings },
+  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboardIcon },
+  { title: 'Settings', url: '/dashboard/settings', icon: Settings },
 ];
 
 const navSecondary = [
@@ -55,8 +48,11 @@ const navSecondary = [
   },
 ];
 
-export function AppSidebar() {
-  const { onOpen } = useDialog();
+interface AppSidebarProps {
+  projects: (Project & { content: Content })[];
+}
+
+export function AppSidebar({ projects }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" side="left" variant="sidebar">
       <SidebarHeader>
@@ -89,27 +85,19 @@ export function AppSidebar() {
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
-                  <SidebarMenuBadge>20</SidebarMenuBadge>
                 </SidebarMenuItem>
               ))}
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <MoreHorizontal />
-                  <span>More</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <SidebarMenuItem></SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <SidebarGroupAction
-            title="Add project"
-            onClick={() => onOpen('project')}
-          >
-            <Plus /> <span className="sr-only">Add Project</span>
-          </SidebarGroupAction>
-        </SidebarGroup>
+        <NavProjects
+          projects={projects.map((project) => ({
+            name: project.content.title,
+            url: `/dashboard/${project.content.spaceId}/projects/${project.contentId}`,
+            icon: File,
+          }))}
+        />
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
