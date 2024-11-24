@@ -44,6 +44,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(dashboardUrl);
   }
 
+  if (request.nextUrl.pathname === '/api/mux/upload') {
+    return supabaseResponse; // Allow the request to continue without authentication
+  }
+
   // Allow both authenticated and unauthenticated users to access the root
   if (request.nextUrl.pathname === '/') {
     return supabaseResponse;

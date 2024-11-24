@@ -1,13 +1,17 @@
-import { events } from './events';
-import { imagesToContent } from './images-to-content';
-import { users } from './users';
-import { createdAt, updatedAt } from '@/utils/common-fields';
 import { jsonb, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
 
+import { createdAt, updatedAt } from '@/utils/common-fields';
+
+import { events } from './events';
+import { imagesToContent } from './images-to-content';
+import { spaces } from './spaces';
+
 export const images = pgTable('images', {
   id: uuid().primaryKey().notNull().defaultRandom(),
-  userId: uuid().references(() => users.id, { onDelete: 'cascade' }),
+  spaceId: uuid()
+    .notNull()
+    .references(() => spaces.id, { onDelete: 'cascade' }),
   alt: varchar({ length: 256 }),
   publicId: varchar({ length: 512 }).notNull(),
   url: varchar({ length: 512 }).notNull(),
@@ -18,7 +22,10 @@ export const images = pgTable('images', {
 });
 
 export const imagesRelations = relations(images, ({ one, many }) => ({
-  user: one(users, { fields: [images.userId], references: [users.id] }),
+  space: one(spaces, { fields: [images.spaceId], references: [spaces.id] }),
   content: many(imagesToContent),
   events: many(events),
 }));
+
+export type Image = typeof images.$inferSelect;
+export type NewImage = typeof images.$inferInsert;

@@ -1,26 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
+import FileUploader from '@/components/ui/file-uploader';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Image as Images, Video } from '@/db/schema';
+import { createClient } from '@/utils/supabase/client';
 
 interface MediaSelectorProps {
-  images: any[];
-  videos: any[];
-  value: { type: 'url' | 'playbackId'; value: string }[];
+  images: Images[];
+  videos: Video[];
+  value: { type: 'url' | 'playbackId'; value: string; identifier?: string }[];
   onChange: (
-    mediaItems: { type: 'url' | 'playbackId'; value: string }[],
+    mediaItems: {
+      type: 'url' | 'playbackId';
+      value: string;
+      identifier?: string;
+    }[],
   ) => void;
   maxSelection?: number;
   title: string;
+  side: 'top' | 'right' | 'bottom' | 'left';
 }
 
 export const MediaSelector = ({
@@ -30,15 +39,29 @@ export const MediaSelector = ({
   onChange,
   maxSelection = 8,
   title,
+  side,
 }: MediaSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [processingVideos, setProcessingVideos] = useState<string[]>([]);
+  const supabase = createClient();
 
+  // Filter valid videos
+  const validVideos = videos.filter(
+    (video): video is Video & { playbackId: string } =>
+      video.playbackId !== null,
+  );
+
+  // Handle media item selection
   const toggleMediaItem = (mediaItem: {
     type: 'url' | 'playbackId';
     value: string;
+    identifier?: string;
   }) => {
     const exists = value.some(
-      (item) => item.type === mediaItem.type && item.value === mediaItem.value,
+      (item) =>
+        item.type === mediaItem.type &&
+        (item.value === mediaItem.value ||
+          item.identifier === mediaItem.identifier),
     );
 
     let newMediaItems;
@@ -46,7 +69,11 @@ export const MediaSelector = ({
     if (exists) {
       newMediaItems = value.filter(
         (item) =>
-          !(item.type === mediaItem.type && item.value === mediaItem.value),
+          !(
+            item.type === mediaItem.type &&
+            (item.value === mediaItem.value ||
+              item.identifier === mediaItem.identifier)
+          ),
       );
     } else {
       if (maxSelection && value.length >= maxSelection) {
@@ -63,6 +90,71 @@ export const MediaSelector = ({
     onChange(newMediaItems);
   };
 
+  const handleUploadComplete = (
+    items: { type: 'url' | 'playbackId'; value: string; identifier?: string }[],
+  ) => {
+    const processingVideoItems = items.filter(
+      (item) => item.type === 'playbackId' && item.identifier,
+    );
+
+    if (processingVideoItems.length > 0) {
+      setProcessingVideos((prev) => [
+        ...prev,
+        ...processingVideoItems.map((item) => item.identifier!),
+      ]);
+    }
+
+    if (maxSelection === 1) {
+      onChange(items);
+    } else {
+      onChange([...value, ...items].slice(0, maxSelection));
+    }
+  };
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('videos')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'videos' },
+        (payload) => {
+          const updatedVideo = payload.new;
+
+          if (updatedVideo.playback_id) {
+            console.log('test');
+            // Remove the processed video from processingVideos
+            setProcessingVideos((prev) => {
+              const newProcessingVideos = prev.filter(
+                (id) => id !== updatedVideo.identifier,
+              );
+              return newProcessingVideos;
+            });
+
+            console.log(value);
+
+            // Find and update the corresponding item in value array
+            const existingItem = value.find(
+              (item) => item.identifier === updatedVideo.identifier,
+            );
+
+            if (existingItem) {
+              console.log('test2');
+              toggleMediaItem({
+                type: 'playbackId',
+                value: updatedVideo.playbackId!,
+                identifier: updatedVideo.identifier!,
+              });
+            }
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, processingVideos, value, toggleMediaItem]);
+
   return (
     <div>
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
@@ -74,96 +166,120 @@ export const MediaSelector = ({
             {title} {maxSelection > 1 && `${value.length}/${maxSelection}`}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="bg-secondary w-full p-4">
-          <ScrollArea>
-            <div>
-              <p className="text-muted-foreground text-xs">Images</p>
-              <div className="flex flex-wrap gap-2">
-                {images.map((image) => {
-                  const isSelected = value.some(
-                    (item) => item.type === 'url' && item.value === image.url,
-                  );
-                  return (
-                    <div
+        <PopoverContent side={side} className="p-4">
+          <Tabs defaultValue="images">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="images">Images</TabsTrigger>
+              <TabsTrigger value="videos">Videos</TabsTrigger>
+              <TabsTrigger value="upload">Upload New</TabsTrigger>
+            </TabsList>
+            <TabsContent value="images">
+              <ScrollArea className="h-[400px]">
+                <div className="flex flex-wrap gap-2">
+                  {images.map((image) => (
+                    <MediaThumbnail
                       key={image.id}
-                      onClick={() =>
-                        toggleMediaItem({ type: 'url', value: image.url })
-                      }
-                      className={`relative h-16 w-32 cursor-pointer ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
-                    >
-                      <Image
-                        src={image.url}
-                        fill
-                        alt={image.id}
-                        className="rounded-md"
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="mt-2">
-              <p className="text-muted-foreground text-xs">Videos</p>
-              <div className="flex flex-wrap gap-2">
-                {videos.map((video) => {
-                  const thumbnailUrl = `https://image.mux.com/${video.playbackId}/thumbnail.webp`;
-                  const isSelected = value.some(
-                    (item) =>
-                      item.type === 'playbackId' &&
-                      item.value === video.playbackId,
-                  );
-                  return (
-                    <div
+                      type="url"
+                      itemValue={image.url}
+                      thumbnailUrl={image.url}
+                      isSelected={value.some(
+                        (item) =>
+                          item.type === 'url' && item.value === image.url,
+                      )}
+                      onToggle={toggleMediaItem}
+                    />
+                  ))}
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="videos">
+              <ScrollArea className="h-[400px]">
+                <div className="flex flex-wrap gap-2">
+                  {validVideos.map((video) => (
+                    <MediaThumbnail
                       key={video.id}
-                      onClick={() =>
-                        toggleMediaItem({
-                          type: 'playbackId',
-                          value: video.playbackId,
-                        })
-                      }
-                      className={`relative h-16 w-32 cursor-pointer ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
-                    >
-                      <Image
-                        src={thumbnailUrl}
-                        fill
-                        alt="thumbnail"
-                        className="rounded-md"
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </ScrollArea>
+                      type="playbackId"
+                      itemValue={video.playbackId}
+                      thumbnailUrl={`https://image.mux.com/${video.playbackId}/thumbnail.webp`}
+                      isSelected={value.some(
+                        (item) =>
+                          item.type === 'playbackId' &&
+                          item.value === video.playbackId,
+                      )}
+                      onToggle={toggleMediaItem}
+                    />
+                  ))}
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="upload">
+              <FileUploader onUploadComplete={handleUploadComplete} />
+            </TabsContent>
+          </Tabs>
         </PopoverContent>
       </Popover>
-
       {maxSelection > 1 && value.length > 0 && (
         <div className="mt-4">
           <p>Selected Media Items:</p>
           <div className="flex flex-wrap gap-2">
             {value.map((item, index) => (
               <div key={index} className="relative h-16 w-32">
-                {item.type === 'url' ? (
-                  <Image
-                    src={item.value}
-                    fill
-                    alt="Selected Image"
-                    className="rounded-md"
-                  />
-                ) : (
-                  <Image
-                    src={`https://image.mux.com/${item.value}/thumbnail.webp`}
-                    fill
-                    alt="Selected Video"
-                    className="rounded-md"
-                  />
-                )}
+                <Image
+                  src={
+                    item.type === 'url'
+                      ? item.value
+                      : `https://image.mux.com/${item.value}/thumbnail.webp`
+                  }
+                  fill
+                  sizes="(max-width: 768px) 128px, 128px"
+                  alt={
+                    item.type === 'url' ? 'Selected Image' : 'Selected Video'
+                  }
+                  className="rounded-md"
+                />
               </div>
             ))}
           </div>
         </div>
       )}
+      {processingVideos.length > 0 && (
+        <div className="mt-4">
+          <p className="text-muted-foreground text-sm">
+            Processing {processingVideos.length} video(s)... This may take a few
+            minutes.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
+
+// Helper component for thumbnails
+const MediaThumbnail = ({
+  type,
+  itemValue,
+  thumbnailUrl,
+  isSelected,
+  onToggle,
+}: {
+  type: 'url' | 'playbackId';
+  itemValue: string;
+  thumbnailUrl: string;
+  isSelected: boolean;
+  onToggle: (item: { type: 'url' | 'playbackId'; value: string }) => void;
+}) => (
+  <div
+    onClick={() => onToggle({ type, value: itemValue })}
+    className={`relative h-16 w-32 cursor-pointer ${
+      isSelected ? 'ring-2 ring-blue-500' : ''
+    }`}
+  >
+    <Image
+      src={thumbnailUrl}
+      fill
+      sizes="(max-width: 768px) 128px, 128px"
+      alt="thumbnail"
+      className="rounded-md"
+    />
+  </div>
+);

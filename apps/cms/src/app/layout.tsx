@@ -4,7 +4,7 @@ import { DialogProvider } from '@/components/providers/dialog-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import UserProvider from '@/components/providers/user-provider';
 import { Toaster } from '@/components/ui/sonner';
-import { getUser } from '@/lib/actions/get-user';
+import { getUser } from '@/lib/actions/get/get-user';
 
 import './globals.css';
 

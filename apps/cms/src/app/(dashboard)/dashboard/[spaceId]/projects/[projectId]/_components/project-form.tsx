@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Image as Images, Video } from '@/db/schema';
 // utils
 import { isRecordOfString } from '@/lib/utils';
 
@@ -46,8 +47,8 @@ type ProjectFormValues = z.infer<typeof formSchema>;
 
 interface ProjectFormProps {
   projectData: any | null;
-  images: any[];
-  videos: any[];
+  images: Images[];
+  videos: Video[];
 }
 
 const formSchema = z.object({
@@ -71,7 +72,6 @@ export default function ProjectForm({
   images,
   videos,
 }: ProjectFormProps) {
-  console.log('Project Data:', projectData);
   // state
   const [selectedCoverMedia, setSelectedCoverMedia] = useState<{
     type: 'url' | 'playbackId';
@@ -88,6 +88,7 @@ export default function ProjectForm({
   const [details, setDetails] = useState<{ [key: string]: string }>(
     isRecordOfString(projectData?.details) ? projectData.details : {},
   );
+  const [isProcessingCover, setIsProcessingCover] = useState(false);
 
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear - i);
@@ -174,6 +175,10 @@ export default function ProjectForm({
               alt="Selected Media"
               className="rounded-md object-cover"
             />
+          ) : isProcessingCover ? (
+            <span className="text-muted-foreground">
+              Processing video cover... This may take a few minutes.
+            </span>
           ) : (
             <Image
               src={`https://image.mux.com/${selectedCoverMedia.value}/thumbnail.webp`}
@@ -200,9 +205,17 @@ export default function ProjectForm({
                 if (mediaItem.type === 'url') {
                   form.setValue('coverImageUrl', mediaItem.value);
                   form.setValue('coverVideoPlaybackId', null); // Ensure only one is set
+                  setIsProcessingCover(false);
                 } else if (mediaItem.type === 'playbackId') {
-                  form.setValue('coverVideoPlaybackId', mediaItem.value);
-                  form.setValue('coverImageUrl', null); // Ensure only one is set
+                  if (mediaItem.identifier && !mediaItem.value) {
+                    // Video is still processing
+                    setIsProcessingCover(true);
+                  } else {
+                    console.log('Selected video:', mediaItem.value);
+                    form.setValue('coverVideoPlaybackId', mediaItem.value);
+                    form.setValue('coverImageUrl', null);
+                    setIsProcessingCover(false);
+                  }
                 }
               } else {
                 // Clear both cover fields if no media is selected
@@ -213,6 +226,7 @@ export default function ProjectForm({
             }}
             maxSelection={1}
             title={selectedCoverMedia ? 'Change Cover' : 'Add Cover'}
+            side="left"
           />
           {selectedCoverMedia && (
             <Button
@@ -403,6 +417,7 @@ export default function ProjectForm({
                   <FormControl>
                     <MediaSelector
                       title="Select Media"
+                      side="bottom"
                       images={images}
                       videos={videos}
                       value={field.value || []}
