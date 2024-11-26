@@ -35,9 +35,6 @@ export const uploadToMux = async (
 
     await createVideo(spaceId as string, identifier);
 
-    console.log('Upload successful:', file.name);
-    console.log('Upload response:', uploadResponse);
-
     // Return the identifier for tracking
     return { status: uploadResponse.status, fileName: file.name, identifier };
   });

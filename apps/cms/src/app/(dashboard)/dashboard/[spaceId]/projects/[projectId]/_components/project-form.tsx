@@ -75,7 +75,8 @@ export default function ProjectForm({
   // state
   const [selectedCoverMedia, setSelectedCoverMedia] = useState<{
     type: 'url' | 'playbackId';
-    value: string;
+    value: string | null;
+    identifier?: string;
   } | null>(
     projectData?.coverImageUrl
       ? { type: 'url', value: projectData.coverImageUrl }
@@ -131,6 +132,8 @@ export default function ProjectForm({
 
   const { setValue } = form;
 
+  console.log(selectedCoverMedia)
+
   const onSubmit = async (
     values: ProjectFormValues,
     status: 'draft' | 'published',
@@ -170,7 +173,7 @@ export default function ProjectForm({
         {selectedCoverMedia ? (
           selectedCoverMedia.type === 'url' ? (
             <Image
-              src={selectedCoverMedia.value}
+              src={selectedCoverMedia.value || ''}
               fill
               alt="Selected Media"
               className="rounded-md object-cover"
@@ -199,26 +202,20 @@ export default function ProjectForm({
             videos={videos}
             value={selectedCoverMedia ? [selectedCoverMedia] : []}
             onChange={(mediaItems) => {
+              console.log('test', mediaItems);
               const mediaItem = mediaItems[0];
               if (mediaItem) {
                 setSelectedCoverMedia(mediaItem);
                 if (mediaItem.type === 'url') {
                   form.setValue('coverImageUrl', mediaItem.value);
-                  form.setValue('coverVideoPlaybackId', null); // Ensure only one is set
+                  form.setValue('coverVideoPlaybackId', null);
                   setIsProcessingCover(false);
                 } else if (mediaItem.type === 'playbackId') {
-                  if (mediaItem.identifier && !mediaItem.value) {
-                    // Video is still processing
-                    setIsProcessingCover(true);
-                  } else {
-                    console.log('Selected video:', mediaItem.value);
-                    form.setValue('coverVideoPlaybackId', mediaItem.value);
-                    form.setValue('coverImageUrl', null);
-                    setIsProcessingCover(false);
-                  }
+                  form.setValue('coverVideoPlaybackId', mediaItem.value);
+                  form.setValue('coverImageUrl', null);
+                  setIsProcessingCover(!mediaItem.value); // Processing if value is not set
                 }
               } else {
-                // Clear both cover fields if no media is selected
                 setSelectedCoverMedia(null);
                 form.setValue('coverImageUrl', null);
                 form.setValue('coverVideoPlaybackId', null);

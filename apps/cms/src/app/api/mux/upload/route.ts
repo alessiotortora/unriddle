@@ -14,7 +14,6 @@ export async function POST(request: Request) {
       const videoId = data.playback_ids[0].id as string;
       const identifier = data.passthrough as string;
       await updateVideo(assetId, videoId, identifier);
-      console.log('Video updated');
     }
 
     return NextResponse.json({ message: 'ok' });

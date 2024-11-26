@@ -25,7 +25,11 @@ interface SonnerProps {
 
 interface FileUploaderProps {
   onUploadComplete?: (
-    items: { type: 'url' | 'playbackId'; value: string; identifier?: string }[],
+    items: {
+      type: 'url' | 'playbackId';
+      value: string | null;
+      identifier?: string;
+    }[],
   ) => void;
 }
 
@@ -73,7 +77,7 @@ function FileUploader({ onUploadComplete }: FileUploaderProps) {
     setLoading(true);
     const uploadedItems: {
       type: 'url' | 'playbackId';
-      value: string;
+      value: string | null;
       identifier?: string;
     }[] = [];
 
@@ -110,7 +114,6 @@ function FileUploader({ onUploadComplete }: FileUploaderProps) {
             if (!videoFiles)
               throw new Error('No video files provided for upload');
 
-            console.log(videoFiles.length);
             const results = await uploadToMux(
               videoFiles,
               params.spaceId as string,
@@ -118,7 +121,7 @@ function FileUploader({ onUploadComplete }: FileUploaderProps) {
             uploadedItems.push(
               ...results.map((r) => ({
                 type: 'playbackId' as const,
-                value: '',
+                value: null,
                 identifier: r.identifier,
               })),
             );
@@ -127,7 +130,6 @@ function FileUploader({ onUploadComplete }: FileUploaderProps) {
           onUploadComplete?.(uploadedItems);
           resolve({ message: 'Upload successful!' });
         } catch (error) {
-          console.log('first error');
           reject(error);
         } finally {
           setLoading(false);

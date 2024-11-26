@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import Image from 'next/image';
 
@@ -19,11 +19,15 @@ import { createClient } from '@/utils/supabase/client';
 interface MediaSelectorProps {
   images: Images[];
   videos: Video[];
-  value: { type: 'url' | 'playbackId'; value: string; identifier?: string }[];
+  value: {
+    type: 'url' | 'playbackId';
+    value: string | null;
+    identifier?: string;
+  }[];
   onChange: (
     mediaItems: {
       type: 'url' | 'playbackId';
-      value: string;
+      value: string | null;
       identifier?: string;
     }[],
   ) => void;
@@ -45,65 +49,75 @@ export const MediaSelector = ({
   const [processingVideos, setProcessingVideos] = useState<string[]>([]);
   const supabase = createClient();
 
+  console.log('value in media selector', value);
+
   // Filter valid videos
   const validVideos = videos.filter(
     (video): video is Video & { playbackId: string } =>
       video.playbackId !== null,
   );
 
-  // Handle media item selection
-  const toggleMediaItem = (mediaItem: {
-    type: 'url' | 'playbackId';
-    value: string;
-    identifier?: string;
-  }) => {
-    const exists = value.some(
-      (item) =>
-        item.type === mediaItem.type &&
-        (item.value === mediaItem.value ||
-          item.identifier === mediaItem.identifier),
-    );
-
-    let newMediaItems;
-
-    if (exists) {
-      newMediaItems = value.filter(
+  // Memoize toggleMediaItem
+  const toggleMediaItem = useCallback(
+    (mediaItem: {
+      type: 'url' | 'playbackId';
+      value: string;
+      identifier?: string;
+    }) => {
+      const exists = value.some(
         (item) =>
-          !(
-            item.type === mediaItem.type &&
-            (item.value === mediaItem.value ||
-              item.identifier === mediaItem.identifier)
-          ),
+          item.type === mediaItem.type && item.value === mediaItem.value,
       );
-    } else {
-      if (maxSelection && value.length >= maxSelection) {
-        if (maxSelection === 1) {
-          newMediaItems = [mediaItem];
-        } else {
-          return;
-        }
-      } else {
-        newMediaItems = [...value, mediaItem];
-      }
-    }
 
-    onChange(newMediaItems);
-  };
+      let newMediaItems;
+
+      if (exists) {
+        newMediaItems = value.filter(
+          (item) =>
+            !(item.type === mediaItem.type && item.value === mediaItem.value),
+        );
+      } else {
+        if (maxSelection && value.length >= maxSelection) {
+          if (maxSelection === 1) {
+            newMediaItems = [mediaItem];
+          } else {
+            return;
+          }
+        } else {
+          newMediaItems = [...value, mediaItem];
+        }
+      }
+
+      onChange(newMediaItems);
+    },
+    [value, maxSelection, onChange],
+  );
 
   const handleUploadComplete = (
-    items: { type: 'url' | 'playbackId'; value: string; identifier?: string }[],
+    items: {
+      type: 'url' | 'playbackId';
+      value: string | null;
+      identifier?: string;
+    }[],
   ) => {
-    const processingVideoItems = items.filter(
-      (item) => item.type === 'playbackId' && item.identifier,
-    );
+    console.log('items', items);
 
-    if (processingVideoItems.length > 0) {
-      setProcessingVideos((prev) => [
-        ...prev,
-        ...processingVideoItems.map((item) => item.identifier!),
-      ]);
+    // Extract identifiers of videos that are still processing
+    const newProcessingVideos = items
+      .filter(
+        (item) =>
+          item.type === 'playbackId' && item.value === null && item.identifier,
+      )
+      .map((item) => item.identifier!); // `!` safe due to the filter above
+
+    // Add only unique identifiers to processingVideos
+    if (newProcessingVideos.length > 0) {
+      setProcessingVideos((prev) =>
+        Array.from(new Set([...prev, ...newProcessingVideos])),
+      );
     }
 
+    // Update the media state with the new items
     if (maxSelection === 1) {
       onChange(items);
     } else {
@@ -119,6 +133,9 @@ export const MediaSelector = ({
         { event: 'UPDATE', schema: 'public', table: 'videos' },
         (payload) => {
           const updatedVideo = payload.new;
+          console.log(payload);
+
+          console.log('updated', updatedVideo);
 
           if (updatedVideo.playback_id) {
             console.log('test');
@@ -138,10 +155,11 @@ export const MediaSelector = ({
             );
 
             if (existingItem) {
+              console.log('item found', existingItem);
               console.log('test2');
               toggleMediaItem({
                 type: 'playbackId',
-                value: updatedVideo.playbackId!,
+                value: updatedVideo.playback_id!,
                 identifier: updatedVideo.identifier!,
               });
             }
@@ -153,7 +171,7 @@ export const MediaSelector = ({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, processingVideos, value, toggleMediaItem]);
+  }, [supabase, toggleMediaItem, value]);
 
   return (
     <div>
@@ -227,7 +245,7 @@ export const MediaSelector = ({
                 <Image
                   src={
                     item.type === 'url'
-                      ? item.value
+                      ? item.value || ''
                       : `https://image.mux.com/${item.value}/thumbnail.webp`
                   }
                   fill

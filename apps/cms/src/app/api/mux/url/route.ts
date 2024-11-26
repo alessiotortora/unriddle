@@ -22,11 +22,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log(
-      'Direct upload URL:',
-      directUpload.new_asset_settings?.passthrough,
-    );
-
     return NextResponse.json({ muxUploadUrl: directUpload.url });
   } catch (error) {
     console.error('Error creating Mux upload URL:', error);

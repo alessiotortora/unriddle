@@ -1,10 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+
 import { eq } from 'drizzle-orm';
 
 import { db } from '@/db';
-import { videos, videoStatusEnum } from '@/db/schema/videos';
+import { videoStatusEnum, videos } from '@/db/schema/videos';
 
 export async function updateVideo(
   assetId: string,

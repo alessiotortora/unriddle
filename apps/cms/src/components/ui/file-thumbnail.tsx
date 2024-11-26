@@ -15,8 +15,6 @@ export default function FileThumbnail({ files, onRemove }: FileThumbnailProps) {
       {files.map((file) => {
         const fileSizeInMB = (file.size / (1024 * 1024)).toFixed(2);
 
-        console.log(file);
-
         return (
           <div
             key={file.name}
