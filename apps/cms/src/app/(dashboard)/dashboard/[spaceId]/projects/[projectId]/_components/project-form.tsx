@@ -84,6 +84,11 @@ export default function ProjectForm({
         ? { type: 'playbackId', value: projectData.coverVideoPlaybackId }
         : null,
   );
+
+  const [generalMediaValue, setGeneralMediaValue] = useState<
+    { type: 'url' | 'playbackId'; value: string | null; identifier?: string }[]
+  >(projectData?.media || []);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tags, setTags] = useState<string[]>(projectData?.tags || []);
   const [details, setDetails] = useState<{ [key: string]: string }>(
@@ -131,8 +136,6 @@ export default function ProjectForm({
   });
 
   const { setValue } = form;
-
-  console.log(selectedCoverMedia)
 
   const onSubmit = async (
     values: ProjectFormValues,
@@ -200,11 +203,12 @@ export default function ProjectForm({
           <MediaSelector
             images={images}
             videos={videos}
-            value={selectedCoverMedia ? [selectedCoverMedia] : []}
+            value={[{ type: 'url', value: 'yes' }]}
             onChange={(mediaItems) => {
-              console.log('test', mediaItems);
               const mediaItem = mediaItems[0];
+              console.log('Selected Cover Media:', mediaItem);
               if (mediaItem) {
+                console.log('Setting Cover Media:', mediaItem);
                 setSelectedCoverMedia(mediaItem);
                 if (mediaItem.type === 'url') {
                   form.setValue('coverImageUrl', mediaItem.value);
@@ -213,7 +217,7 @@ export default function ProjectForm({
                 } else if (mediaItem.type === 'playbackId') {
                   form.setValue('coverVideoPlaybackId', mediaItem.value);
                   form.setValue('coverImageUrl', null);
-                  setIsProcessingCover(!mediaItem.value); // Processing if value is not set
+                  setIsProcessingCover(!mediaItem.value);
                 }
               } else {
                 setSelectedCoverMedia(null);
@@ -417,9 +421,12 @@ export default function ProjectForm({
                       side="bottom"
                       images={images}
                       videos={videos}
-                      value={field.value || []}
+                      value={generalMediaValue}
                       maxSelection={8}
-                      onChange={field.onChange}
+                      onChange={(mediaItems) => {
+                        setGeneralMediaValue(mediaItems);
+                        field.onChange(mediaItems);
+                      }}
                     />
                   </FormControl>
                   <FormDescription>

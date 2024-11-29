@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import FileUploader from '@/components/ui/file-uploader';
@@ -46,16 +47,17 @@ export const MediaSelector = ({
   side,
 }: MediaSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [processingVideos, setProcessingVideos] = useState<string[]>([]);
   const supabase = createClient();
-
-  console.log('value in media selector', value);
+  const router = useRouter();
 
   // Filter valid videos
   const validVideos = videos.filter(
     (video): video is Video & { playbackId: string } =>
       video.playbackId !== null,
   );
+
+  console.log('MediaSelector Value:', value);
+  console.log('MediaSelector maxSelection:', maxSelection);
 
   // Memoize toggleMediaItem
   const toggleMediaItem = useCallback(
@@ -100,28 +102,26 @@ export const MediaSelector = ({
       identifier?: string;
     }[],
   ) => {
-    console.log('items', items);
-
-    // Extract identifiers of videos that are still processing
-    const newProcessingVideos = items
-      .filter(
-        (item) =>
-          item.type === 'playbackId' && item.value === null && item.identifier,
-      )
-      .map((item) => item.identifier!); // `!` safe due to the filter above
-
-    // Add only unique identifiers to processingVideos
-    if (newProcessingVideos.length > 0) {
-      setProcessingVideos((prev) =>
-        Array.from(new Set([...prev, ...newProcessingVideos])),
-      );
-    }
-
-    // Update the media state with the new items
+    console.log('upload complete', items);
+    console.log('maxSelection', maxSelection);
     if (maxSelection === 1) {
       onChange(items);
     } else {
-      onChange([...value, ...items].slice(0, maxSelection));
+      const newItems = [...items];
+      console.log('new Items here', newItems);
+      items.forEach((item) => {
+        if (
+          !newItems.some(
+            (existing) =>
+              existing.identifier === item.identifier ||
+              (existing.type === item.type && existing.value === item.value),
+          )
+        ) {
+          newItems.push(item);
+        }
+      });
+      console.log('updating all items');
+      onChange(newItems.slice(0, maxSelection));
     }
   };
 
@@ -133,35 +133,28 @@ export const MediaSelector = ({
         { event: 'UPDATE', schema: 'public', table: 'videos' },
         (payload) => {
           const updatedVideo = payload.new;
-          console.log(payload);
-
-          console.log('updated', updatedVideo);
+          console.log('payload received');
 
           if (updatedVideo.playback_id) {
-            console.log('test');
-            // Remove the processed video from processingVideos
-            setProcessingVideos((prev) => {
-              const newProcessingVideos = prev.filter(
-                (id) => id !== updatedVideo.identifier,
-              );
-              return newProcessingVideos;
+            console.log('updating video', updatedVideo);
+            console.log('current value', value);
+
+            // Find and update the processed video in value array
+            const updatedValue = value.map((item) => {
+              if (item.identifier === updatedVideo.identifier) {
+                return {
+                  type: 'playbackId' as const,
+                  value: updatedVideo.playback_id,
+                  identifier: updatedVideo.identifier,
+                };
+              }
+              return item;
             });
 
-            console.log(value);
-
-            // Find and update the corresponding item in value array
-            const existingItem = value.find(
-              (item) => item.identifier === updatedVideo.identifier,
-            );
-
-            if (existingItem) {
-              console.log('item found', existingItem);
-              console.log('test2');
-              toggleMediaItem({
-                type: 'playbackId',
-                value: updatedVideo.playback_id!,
-                identifier: updatedVideo.identifier!,
-              });
+            // Only update if there were changes
+            if (JSON.stringify(updatedValue) !== JSON.stringify(value)) {
+              onChange(updatedValue);
+              router.refresh();
             }
           }
         },
@@ -171,7 +164,7 @@ export const MediaSelector = ({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, toggleMediaItem, value]);
+  }, [supabase, value, onChange, router]);
 
   return (
     <div>
@@ -258,14 +251,6 @@ export const MediaSelector = ({
               </div>
             ))}
           </div>
-        </div>
-      )}
-      {processingVideos.length > 0 && (
-        <div className="mt-4">
-          <p className="text-muted-foreground text-sm">
-            Processing {processingVideos.length} video(s)... This may take a few
-            minutes.
-          </p>
         </div>
       )}
     </div>
