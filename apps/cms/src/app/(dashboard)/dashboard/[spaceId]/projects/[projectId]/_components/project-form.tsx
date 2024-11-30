@@ -38,10 +38,12 @@ import { Image as Images, Video } from '@/db/schema';
 // utils
 import { isRecordOfString } from '@/lib/utils';
 
+import { CoverSection } from './cover-section';
 import DetailsInput from './details-input';
 import { MediaSelector } from './media-selector';
 // custom components
 import { TagInput } from './tag-input';
+import MediaSection from './media-section';
 
 type ProjectFormValues = z.infer<typeof formSchema>;
 
@@ -63,6 +65,10 @@ const formSchema = z.object({
     .array(z.object({ type: z.enum(['url', 'playbackId']), value: z.string() }))
     .max(8)
     .nullable(),
+  coverMedia: z.array(z.object({
+    type: z.enum(['url', 'playbackId']),
+    value: z.string()
+  })).optional(),
   coverImageUrl: z.string().nullable(),
   coverVideoPlaybackId: z.string().nullable(),
 });
@@ -72,29 +78,11 @@ export default function ProjectForm({
   images,
   videos,
 }: ProjectFormProps) {
-  // state
-  const [selectedCoverMedia, setSelectedCoverMedia] = useState<{
-    type: 'url' | 'playbackId';
-    value: string | null;
-    identifier?: string;
-  } | null>(
-    projectData?.coverImageUrl
-      ? { type: 'url', value: projectData.coverImageUrl }
-      : projectData?.coverVideoPlaybackId
-        ? { type: 'playbackId', value: projectData.coverVideoPlaybackId }
-        : null,
-  );
-
-  const [generalMediaValue, setGeneralMediaValue] = useState<
-    { type: 'url' | 'playbackId'; value: string | null; identifier?: string }[]
-  >(projectData?.media || []);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tags, setTags] = useState<string[]>(projectData?.tags || []);
   const [details, setDetails] = useState<{ [key: string]: string }>(
     isRecordOfString(projectData?.details) ? projectData.details : {},
   );
-  const [isProcessingCover, setIsProcessingCover] = useState(false);
 
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear - i);
@@ -126,12 +114,8 @@ export default function ProjectForm({
             })),
           ]
         : null,
-      coverImageUrl:
-        selectedCoverMedia?.type === 'url' ? selectedCoverMedia.value : null,
-      coverVideoPlaybackId:
-        selectedCoverMedia?.type === 'playbackId'
-          ? selectedCoverMedia.value
-          : null,
+      coverImageUrl: projectData?.coverImageUrl || null,
+      coverVideoPlaybackId: projectData?.coverVideoPlaybackId || null,
     },
   });
 
@@ -171,83 +155,18 @@ export default function ProjectForm({
 
   return (
     <>
-      {/* Cover Image Section */}
-      <div className="relative mb-4 mt-4 flex h-64 w-full items-center justify-center rounded-md">
-        {selectedCoverMedia ? (
-          selectedCoverMedia.type === 'url' ? (
-            <Image
-              src={selectedCoverMedia.value || ''}
-              fill
-              alt="Selected Media"
-              className="rounded-md object-cover"
-            />
-          ) : isProcessingCover ? (
-            <span className="text-muted-foreground">
-              Processing video cover... This may take a few minutes.
-            </span>
-          ) : (
-            <Image
-              src={`https://image.mux.com/${selectedCoverMedia.value}/thumbnail.webp`}
-              fill
-              alt="Selected Media GIF"
-              className="rounded-md object-cover"
-            />
-          )
-        ) : (
-          <span className="text-muted-foreground">
-            Please add a cover by selecting a media item.
-          </span>
-        )}
-
-        <div className="absolute right-2 top-2 flex gap-2">
-          <MediaSelector
-            images={images}
-            videos={videos}
-            value={[{ type: 'url', value: 'yes' }]}
-            onChange={(mediaItems) => {
-              const mediaItem = mediaItems[0];
-              console.log('Selected Cover Media:', mediaItem);
-              if (mediaItem) {
-                console.log('Setting Cover Media:', mediaItem);
-                setSelectedCoverMedia(mediaItem);
-                if (mediaItem.type === 'url') {
-                  form.setValue('coverImageUrl', mediaItem.value);
-                  form.setValue('coverVideoPlaybackId', null);
-                  setIsProcessingCover(false);
-                } else if (mediaItem.type === 'playbackId') {
-                  form.setValue('coverVideoPlaybackId', mediaItem.value);
-                  form.setValue('coverImageUrl', null);
-                  setIsProcessingCover(!mediaItem.value);
-                }
-              } else {
-                setSelectedCoverMedia(null);
-                form.setValue('coverImageUrl', null);
-                form.setValue('coverVideoPlaybackId', null);
-              }
-            }}
-            maxSelection={1}
-            title={selectedCoverMedia ? 'Change Cover' : 'Add Cover'}
-            side="left"
-          />
-          {selectedCoverMedia && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setSelectedCoverMedia(null);
-                form.setValue('coverImageUrl', null);
-                form.setValue('coverVideoPlaybackId', null);
-              }}
-            >
-              Remove
-            </Button>
-          )}
-        </div>
-      </div>
-
       <div>
         <Form {...form}>
           <form className="flex w-full flex-col gap-6">
+            <CoverSection
+              control={form.control}
+              initialCoverImage={projectData?.coverImageUrl}
+              initialCoverVideo={projectData?.coverVideoPlaybackId}
+              images={images}
+              videos={videos}
+              setValue={setValue}
+            />
+
             <div className="flex justify-between gap-2">
               {/* Name Field */}
               <FormField
@@ -408,35 +327,13 @@ export default function ProjectForm({
                 </FormItem>
               )}
             />
-            {/* Media Items Field */}
-            <FormField
+            {/* Replace Media Items Field with MediaSection */}
+            <MediaSection 
               control={form.control}
-              name="media"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Media Items</FormLabel>
-                  <FormControl>
-                    <MediaSelector
-                      title="Select Media"
-                      side="bottom"
-                      images={images}
-                      videos={videos}
-                      value={generalMediaValue}
-                      maxSelection={8}
-                      onChange={(mediaItems) => {
-                        setGeneralMediaValue(mediaItems);
-                        field.onChange(mediaItems);
-                      }}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Select up to 8 images or videos that showcase your project.
-                    Examples could include screenshots, project photos, or demo
-                    videos.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+              setValue={setValue}
+              initialMedia={projectData?.media || []}
+              images={images}
+              videos={videos}
             />
 
             {/* Submit Buttons */}

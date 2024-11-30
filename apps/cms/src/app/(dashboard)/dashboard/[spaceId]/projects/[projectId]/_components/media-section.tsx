@@ -1,0 +1,80 @@
+'use client';
+
+import { useState } from 'react';
+
+import { UseFormSetValue } from 'react-hook-form';
+
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Image as Images, Video } from '@/db/schema';
+
+import { MediaSelector } from './media-selector';
+
+interface MediaSectionProps {
+  control: any;
+  setValue: UseFormSetValue<any>;
+  initialMedia?: {
+    type: 'url' | 'playbackId';
+    value: string | null;
+    identifier?: string;
+  }[];
+  images: Images[];
+  videos: Video[];
+}
+
+export default function MediaSection({
+  control,
+  setValue,
+  initialMedia = [],
+  images,
+  videos,
+}: MediaSectionProps) {
+  const [generalMediaValue, setGeneralMediaValue] =
+    useState<
+      {
+        type: 'url' | 'playbackId';
+        value: string | null;
+        identifier?: string;
+      }[]
+    >(initialMedia);
+
+  console.log('media rerendered');
+
+  return (
+    <FormField
+      control={control}
+      name="media"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Media Items</FormLabel>
+          <FormControl>
+            <MediaSelector
+              id="media"
+              title="Select Media"
+              side="bottom"
+              images={images}
+              videos={videos}
+              value={generalMediaValue}
+              maxSelection={8}
+              onChange={(mediaItems) => {
+                setGeneralMediaValue(mediaItems);
+                field.onChange(mediaItems);
+              }}
+            />
+          </FormControl>
+          <FormDescription>
+            Select up to 8 images or videos that showcase your project. Examples
+            could include screenshots, project photos, or demo videos.
+          </FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}

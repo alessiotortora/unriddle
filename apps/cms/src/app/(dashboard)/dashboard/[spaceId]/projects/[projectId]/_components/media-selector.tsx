@@ -18,6 +18,7 @@ import { Image as Images, Video } from '@/db/schema';
 import { createClient } from '@/utils/supabase/client';
 
 interface MediaSelectorProps {
+  id?: string; // Add this prop
   images: Images[];
   videos: Video[];
   value: {
@@ -38,6 +39,7 @@ interface MediaSelectorProps {
 }
 
 export const MediaSelector = ({
+  id = 'default',
   images,
   videos,
   value,
@@ -55,9 +57,6 @@ export const MediaSelector = ({
     (video): video is Video & { playbackId: string } =>
       video.playbackId !== null,
   );
-
-  console.log('MediaSelector Value:', value);
-  console.log('MediaSelector maxSelection:', maxSelection);
 
   // Memoize toggleMediaItem
   const toggleMediaItem = useCallback(
@@ -102,13 +101,10 @@ export const MediaSelector = ({
       identifier?: string;
     }[],
   ) => {
-    console.log('upload complete', items);
-    console.log('maxSelection', maxSelection);
     if (maxSelection === 1) {
       onChange(items);
     } else {
       const newItems = [...items];
-      console.log('new Items here', newItems);
       items.forEach((item) => {
         if (
           !newItems.some(
@@ -120,24 +116,23 @@ export const MediaSelector = ({
           newItems.push(item);
         }
       });
-      console.log('updating all items');
       onChange(newItems.slice(0, maxSelection));
     }
   };
 
   useEffect(() => {
     const channel = supabase
-      .channel('videos')
+      .channel(`videos-${id}`)
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'videos' },
         (payload) => {
           const updatedVideo = payload.new;
-          console.log('payload received');
+          console.log('payload received for', id);
 
           if (updatedVideo.playback_id) {
             console.log('updating video', updatedVideo);
-            console.log('current value', value);
+            console.log(`current value for ${id}`, value);
 
             // Find and update the processed video in value array
             const updatedValue = value.map((item) => {
@@ -164,7 +159,7 @@ export const MediaSelector = ({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, value, onChange, router]);
+  }, [supabase, value, onChange, router, id]);
 
   return (
     <div>
