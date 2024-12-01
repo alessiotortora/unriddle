@@ -31,9 +31,10 @@ interface FileUploaderProps {
       identifier?: string;
     }[],
   ) => void;
+  maxFiles?: number;
 }
 
-function FileUploader({ onUploadComplete }: FileUploaderProps) {
+function FileUploader({ onUploadComplete, maxFiles = 5 }: FileUploaderProps) {
   const router = useRouter();
   const params = useParams();
   const [files, setFiles] = useState<FileWithPreview[]>([]);
@@ -57,10 +58,11 @@ function FileUploader({ onUploadComplete }: FileUploaderProps) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { 'image/*': [], 'video/*': [] },
-    maxFiles: 5,
-    multiple: true,
+    maxFiles: maxFiles,
+    multiple: maxFiles > 1,
     onDropRejected: () =>
       setError('File rejected. Please ensure the file is an image or video.'),
+    disabled: loading, // Disable dropzone while loading
   });
 
   useEffect(() => {
@@ -150,10 +152,15 @@ function FileUploader({ onUploadComplete }: FileUploaderProps) {
 
   return (
     <div className="flex min-h-full flex-col items-end">
-      <div className="flex h-36 w-full cursor-pointer items-center justify-center border border-dashed p-20 outline-none">
+      <div className={`flex h-36 w-full cursor-pointer items-center justify-center border border-dashed p-20 outline-none ${loading ? 'opacity-50' : ''}`}>
         <div {...getRootProps()} className="text-center">
           <input {...getInputProps()} />
-          {isDragActive ? (
+          {loading ? (
+            <div className="flex flex-col items-center">
+              <Upload size={36} className="animate-pulse" strokeWidth={1.5} />
+              <p className="dropzone">Uploading files...</p>
+            </div>
+          ) : isDragActive ? (
             <div>
               <Upload size={36} />
               <p className="dropzone">Drop your image/video files here...</p>
@@ -162,7 +169,8 @@ function FileUploader({ onUploadComplete }: FileUploaderProps) {
             <div className="flex flex-col items-center">
               <Upload size={36} strokeWidth={1.5} />
               <p className="dropzone">
-                Drag & drop images/videos here or click to select files (max 5)
+                Drag & drop {maxFiles > 1 ? `up to ${maxFiles} ` : ''}
+                {maxFiles > 1 ? 'images/videos' : 'an image/video'} here or click to select
               </p>
             </div>
           )}
@@ -186,7 +194,7 @@ function FileUploader({ onUploadComplete }: FileUploaderProps) {
       <aside className="mt-4 flex w-full flex-wrap justify-center">
         <FileThumbnail files={files} onRemove={handleRemoveFile} />
       </aside>
-    </div>
+    </div> 
   );
 }
 

@@ -1,5 +1,6 @@
 import {
   FileText,
+  FileVideo,
   Folder,
   House,
   Images,
@@ -31,6 +32,7 @@ const icons: { [key: string]: LucideIcon } = {
   x: X,
   squarePlus: SquarePlus,
   fileText: FileText,
+  fileVideo: FileVideo,
 };
 
 export default function Icon({

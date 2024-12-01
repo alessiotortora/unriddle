@@ -18,7 +18,6 @@ import { MediaSelector } from './media-selector';
 
 interface MediaSectionProps {
   control: any;
-  setValue: UseFormSetValue<any>;
   initialMedia?: {
     type: 'url' | 'playbackId';
     value: string | null;
@@ -30,21 +29,17 @@ interface MediaSectionProps {
 
 export default function MediaSection({
   control,
-  setValue,
   initialMedia = [],
   images,
   videos,
 }: MediaSectionProps) {
-  const [generalMediaValue, setGeneralMediaValue] =
-    useState<
-      {
-        type: 'url' | 'playbackId';
-        value: string | null;
-        identifier?: string;
-      }[]
-    >(initialMedia);
-
-  console.log('media rerendered');
+  const [generalMediaValue, setGeneralMediaValue] = useState<
+    {
+      type: 'url' | 'playbackId';
+      value: string | null;
+      identifier?: string;
+    }[]
+  >(initialMedia);
 
   return (
     <FormField

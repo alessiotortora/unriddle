@@ -3,9 +3,6 @@
 // react
 import { useState } from 'react';
 
-// next
-import Image from 'next/image';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 // form
@@ -40,10 +37,10 @@ import { isRecordOfString } from '@/lib/utils';
 
 import { CoverSection } from './cover-section';
 import DetailsInput from './details-input';
+import MediaSection from './media-section';
 import { MediaSelector } from './media-selector';
 // custom components
 import { TagInput } from './tag-input';
-import MediaSection from './media-section';
 
 type ProjectFormValues = z.infer<typeof formSchema>;
 
@@ -65,10 +62,14 @@ const formSchema = z.object({
     .array(z.object({ type: z.enum(['url', 'playbackId']), value: z.string() }))
     .max(8)
     .nullable(),
-  coverMedia: z.array(z.object({
-    type: z.enum(['url', 'playbackId']),
-    value: z.string()
-  })).optional(),
+  coverMedia: z
+    .array(
+      z.object({
+        type: z.enum(['url', 'playbackId']),
+        value: z.string(),
+      }),
+    )
+    .optional(),
   coverImageUrl: z.string().nullable(),
   coverVideoPlaybackId: z.string().nullable(),
 });
@@ -160,8 +161,6 @@ export default function ProjectForm({
           <form className="flex w-full flex-col gap-6">
             <CoverSection
               control={form.control}
-              initialCoverImage={projectData?.coverImageUrl}
-              initialCoverVideo={projectData?.coverVideoPlaybackId}
               images={images}
               videos={videos}
               setValue={setValue}
@@ -328,9 +327,8 @@ export default function ProjectForm({
               )}
             />
             {/* Replace Media Items Field with MediaSection */}
-            <MediaSection 
+            <MediaSection
               control={form.control}
-              setValue={setValue}
               initialMedia={projectData?.media || []}
               images={images}
               videos={videos}

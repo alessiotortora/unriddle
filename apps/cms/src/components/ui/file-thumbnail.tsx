@@ -14,6 +14,7 @@ export default function FileThumbnail({ files, onRemove }: FileThumbnailProps) {
     <>
       {files.map((file) => {
         const fileSizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+        const isVideo = file.type.startsWith('video/');
 
         return (
           <div
@@ -22,16 +23,26 @@ export default function FileThumbnail({ files, onRemove }: FileThumbnailProps) {
           >
             <div className="flex items-center gap-3">
               <div className="relative h-12 w-12">
-                <Image
-                  src={file.preview}
-                  onLoad={() => {
-                    URL.revokeObjectURL(file.preview);
-                  }}
-                  fill
-                  loading="lazy"
-                  alt={file.name}
-                  className="aspect-square shrink-0 rounded-lg object-cover"
-                />
+                {isVideo ? (
+                  <div className="bg-muted flex h-full w-full items-center justify-center rounded-lg">
+                    <Icon
+                      name="fileVideo"
+                      size={24}
+                      className="text-foreground/70"
+                    />
+                  </div>
+                ) : (
+                  <Image
+                    src={file.preview}
+                    onLoad={() => {
+                      URL.revokeObjectURL(file.preview);
+                    }}
+                    fill
+                    loading="lazy"
+                    alt={file.name}
+                    className="aspect-square shrink-0 rounded-lg object-cover"
+                  />
+                )}
               </div>
               <div>
                 <p className="text-foreground/80 text-sm font-medium">
