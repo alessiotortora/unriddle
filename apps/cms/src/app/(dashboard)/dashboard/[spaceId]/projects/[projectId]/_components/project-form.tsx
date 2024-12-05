@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Image as Images, Video } from '@/db/schema';
+import { updateProject } from '@/lib/actions/update/update-project';
 // utils
 import { isRecordOfString } from '@/lib/utils';
 
@@ -85,6 +86,8 @@ export default function ProjectForm({
     isRecordOfString(projectData?.details) ? projectData.details : {},
   );
 
+
+
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear - i);
   const formattedUpdatedAt = projectData?.updatedAt
@@ -105,18 +108,22 @@ export default function ProjectForm({
         : null,
       media: projectData
         ? [
-            ...(projectData.images || []).map((image: any) => ({
-              type: 'url' as const,
-              value: image.url,
-            })),
-            ...(projectData.videos || []).map((video: any) => ({
-              type: 'playbackId' as const,
-              value: video.playbackId,
-            })),
+            ...(projectData?.content.imagesToContent || []).map(
+              (image: any) => ({
+                type: 'url' as const,
+                value: image.url,
+              }),
+            ),
+            ...(projectData?.content.videosToContent || []).map(
+              (video: any) => ({
+                type: 'playbackId' as const,
+                value: video.playbackId,
+              }),
+            ),
           ]
         : null,
-      coverImageUrl: projectData?.coverImageUrl || null,
-      coverVideoPlaybackId: projectData?.coverVideoPlaybackId || null,
+      coverImageUrl: projectData?.content.coverImageUrl || null,
+      coverVideoPlaybackId: projectData?.content.coverVideoPlaybackId || null,
     },
   });
 
@@ -127,26 +134,39 @@ export default function ProjectForm({
     status: 'draft' | 'published',
   ) => {
     setIsSubmitting(true);
+
+    console.log('Submitting project:', values);
     try {
       const images = values.media
         ? values.media
             .filter((item) => item.type === 'url')
             .map((item) => item.value)
-        : null;
+        : [];
       const videos = values.media
         ? values.media
             .filter((item) => item.type === 'playbackId')
             .map((item) => item.value)
-        : null;
+        : [];
 
       const payload = {
-        ...values,
+        title: values.title,
+        description: values.description ?? null,
+        year: values.year ?? null,
+        tags: values.tags ?? [],
         status,
+        coverImageUrl: values.coverImageUrl ?? null,
+        coverVideoPlaybackId: values.coverVideoPlaybackId ?? null,
+        details: values.details ?? {},
+        featured: values.featured ?? false,
         images,
         videos,
       };
 
       console.log('Submitting project:', payload);
+
+      await updateProject(projectData.id, payload);
+
+      console.log('Project updated successfully');
     } catch (error) {
       console.error(error);
     } finally {

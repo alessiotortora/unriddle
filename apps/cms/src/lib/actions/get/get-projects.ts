@@ -1,3 +1,5 @@
+'use server';
+
 import { desc } from 'drizzle-orm';
 
 import { db } from '@/db';

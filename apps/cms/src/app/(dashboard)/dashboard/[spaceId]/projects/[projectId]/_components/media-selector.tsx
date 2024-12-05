@@ -1,8 +1,10 @@
 'use client';
 
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+
 import Image from 'next/image';
-import { Loader2 } from "lucide-react";
+
+import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import FileUploader from '@/components/ui/file-uploader';
@@ -27,6 +29,7 @@ interface MediaSelectorProps {
   }[];
   onChange: (
     mediaItems: {
+      id?: string;
       type: 'url' | 'playbackId';
       value: string | null;
       identifier?: string;
@@ -38,7 +41,7 @@ interface MediaSelectorProps {
 }
 
 const LoadingSpinner = () => (
-  <div className="flex h-16 w-32 items-center justify-center bg-gray-100 rounded-md">
+  <div className="flex h-16 w-32 items-center justify-center rounded-md bg-gray-100">
     <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
   </div>
 );
@@ -74,7 +77,7 @@ export const MediaSelector = ({
               identifier: updatedVideo.identifier,
             };
           }
-          return item; // This branch maintains the correct type
+          return item;
         });
 
         // Check for changes
@@ -92,13 +95,14 @@ export const MediaSelector = ({
 
   useRealtime(`videos-${id}`, handleVideoUpdate);
 
- 
   const toggleMediaItem = useCallback(
     (mediaItem: {
       type: 'url' | 'playbackId';
+      id: string;
       value: string;
       identifier?: string;
     }) => {
+      console.log(mediaItem);
       const exists = value.some(
         (item) =>
           item.type === mediaItem.type && item.value === mediaItem.value,
@@ -157,7 +161,7 @@ export const MediaSelector = ({
 
       onChange(newItems.slice(0, maxSelection));
     }
-    
+
     // Close the popover after successful upload
     setIsPopoverOpen(false);
   };
@@ -186,6 +190,7 @@ export const MediaSelector = ({
                   {images.map((image) => (
                     <Suspense key={image.id} fallback={<LoadingSpinner />}>
                       <MediaThumbnail
+                        id={image.id}
                         type="url"
                         itemValue={image.url}
                         thumbnailUrl={image.url}
@@ -206,15 +211,18 @@ export const MediaSelector = ({
                   {videos.map((video) => (
                     <Suspense key={video.id} fallback={<LoadingSpinner />}>
                       <MediaThumbnail
+                        id={video.id}
                         type="playbackId"
                         itemValue={video.playbackId || ''}
-                        thumbnailUrl={video.playbackId 
-                          ? `https://image.mux.com/${video.playbackId}/thumbnail.webp`
-                          : ''}
+                        thumbnailUrl={
+                          video.playbackId
+                            ? `https://image.mux.com/${video.playbackId}/thumbnail.webp`
+                            : ''
+                        }
                         isSelected={value.some(
                           (item) =>
                             item.type === 'playbackId' &&
-                            item.value === video.playbackId
+                            item.value === video.playbackId,
                         )}
                         onToggle={toggleMediaItem}
                         isPending={!video.playbackId}
@@ -225,8 +233,8 @@ export const MediaSelector = ({
               </ScrollArea>
             </TabsContent>
             <TabsContent value="upload">
-              <FileUploader 
-                onUploadComplete={handleUploadComplete} 
+              <FileUploader
+                onUploadComplete={handleUploadComplete}
                 maxFiles={Math.min(maxSelection || 5, 5)}
               />
             </TabsContent>
@@ -239,7 +247,7 @@ export const MediaSelector = ({
           <div className="flex flex-wrap gap-2">
             {value.map((item, index) => (
               <Suspense key={index} fallback={<LoadingSpinner />}>
-                {(!item.value || (item.type === 'playbackId' && !item.value)) ? (
+                {!item.value || (item.type === 'playbackId' && !item.value) ? (
                   <LoadingSpinner />
                 ) : (
                   <div className="relative h-16 w-32">
@@ -251,7 +259,11 @@ export const MediaSelector = ({
                       }
                       fill
                       sizes="(max-width: 768px) 128px, 128px"
-                      alt={item.type === 'url' ? 'Selected Image' : 'Selected Video'}
+                      alt={
+                        item.type === 'url'
+                          ? 'Selected Image'
+                          : 'Selected Video'
+                      }
                       className="rounded-md"
                     />
                   </div>
@@ -267,6 +279,7 @@ export const MediaSelector = ({
 
 // Helper component for thumbnails
 const MediaThumbnail = ({
+  id,
   type,
   itemValue,
   thumbnailUrl,
@@ -274,11 +287,16 @@ const MediaThumbnail = ({
   onToggle,
   isPending,
 }: {
+  id: string;
   type: 'url' | 'playbackId';
   itemValue: string;
   thumbnailUrl: string;
   isSelected: boolean;
-  onToggle: (item: { type: 'url' | 'playbackId'; value: string }) => void;
+  onToggle: (item: {
+    type: 'url' | 'playbackId';
+    value: string;
+    id: string;
+  }) => void;
   isPending?: boolean;
 }) => {
   if (isPending || !thumbnailUrl) {
@@ -287,7 +305,7 @@ const MediaThumbnail = ({
 
   return (
     <div
-      onClick={() => onToggle({ type, value: itemValue })}
+      onClick={() => onToggle({ type, value: itemValue, id: id })}
       className={`relative h-16 w-32 cursor-pointer ${
         isSelected ? 'ring-2 ring-blue-500' : ''
       }`}

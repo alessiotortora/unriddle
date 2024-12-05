@@ -19,6 +19,7 @@ import { MediaSelector } from './media-selector';
 interface MediaSectionProps {
   control: any;
   initialMedia?: {
+    id: string;
     type: 'url' | 'playbackId';
     value: string | null;
     identifier?: string;
@@ -35,11 +36,14 @@ export default function MediaSection({
 }: MediaSectionProps) {
   const [generalMediaValue, setGeneralMediaValue] = useState<
     {
+      id?: string;
       type: 'url' | 'playbackId';
       value: string | null;
       identifier?: string;
     }[]
   >(initialMedia);
+
+  console.log('generalMediaValue', generalMediaValue);
 
   return (
     <FormField

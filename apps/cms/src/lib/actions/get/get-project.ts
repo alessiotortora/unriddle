@@ -1,3 +1,5 @@
+'use server';
+
 import { db } from '@/db';
 
 export async function getProject(projectId: string) {
@@ -5,7 +7,22 @@ export async function getProject(projectId: string) {
     const project = await db.query.projects.findFirst({
       where: (projects, { eq }) => eq(projects.contentId, projectId),
       with: {
-        content: true,
+        content: {
+          with: {
+            coverImage: true,
+            coverVideo: true,
+            videosToContent: {
+              with: {
+                video: true,
+              },
+            },
+            imagesToContent: {
+              with: {
+                image: true,
+              },
+            },
+          },
+        },
       },
     });
 

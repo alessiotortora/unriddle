@@ -1,8 +1,13 @@
+import { pgEnum, pgTable, text, uuid, varchar } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm/relations';
+
+import { createdAt, updatedAt } from '@/utils/common-fields';
+
 import { images } from './images';
+import { imagesToContent } from './images-to-content';
 import { spaces } from './spaces';
 import { videos } from './videos';
-import { createdAt, updatedAt } from '@/utils/common-fields';
-import { pgEnum, pgTable, text, uuid, varchar } from 'drizzle-orm/pg-core';
+import { videosToContent } from './videos-to-content';
 
 export const contentTypeEnum = pgEnum('content_type', [
   'project',
@@ -35,6 +40,23 @@ export const content = pgTable('content', {
   createdAt,
   updatedAt,
 });
+
+export const contentRelations = relations(content, ({ one, many }) => ({
+  space: one(spaces, {
+    fields: [content.spaceId],
+    references: [spaces.id],
+  }),
+  coverImage: one(images, {
+    fields: [content.coverImageId],
+    references: [images.id],
+  }),
+  coverVideo: one(videos, {
+    fields: [content.coverVideoId],
+    references: [videos.id],
+  }),
+  imagesToContent: many(imagesToContent),
+  videosToContent: many(videosToContent),
+}));
 
 export type Content = typeof content.$inferSelect;
 export type NewContent = typeof content.$inferInsert;
