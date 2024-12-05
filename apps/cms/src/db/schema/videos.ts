@@ -1,4 +1,12 @@
-import { pgEnum, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
+import {
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  real,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
 
 import { createdAt, updatedAt } from '@/utils/common-fields';
@@ -23,6 +31,9 @@ export const videos = pgTable('videos', {
   playbackId: varchar({ length: 512 }),
   status: videoStatusEnum().default('processing'),
   identifier: varchar({ length: 512 }).unique(),
+  duration: real(),
+  bytes: integer(),
+  aspectRatio: varchar({ length: 16 }),
   createdAt,
   updatedAt,
 });

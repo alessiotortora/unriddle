@@ -13,7 +13,9 @@ export async function POST(request: Request) {
       const assetId = data.id as string;
       const videoId = data.playback_ids[0].id as string;
       const identifier = data.passthrough as string;
-      await updateVideo(assetId, videoId, identifier);
+      const duration = data.duration as number;
+      const aspectRatio = data.aspect_ratio as string;
+      await updateVideo(assetId, videoId, identifier, duration, aspectRatio);
     }
 
     return NextResponse.json({ message: 'ok' });

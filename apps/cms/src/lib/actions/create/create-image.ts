@@ -7,6 +7,13 @@ import { NewImage } from '@/db/schema/images';
 interface ImageInput {
   publicId: string;
   url: string;
+  bytes: number;
+  resolution: {
+    width: number;
+    height: number;
+  };
+  format: string;
+  alt?: string;
 }
 
 export async function createImage(imageInputs: ImageInput[], spaceId: string) {
@@ -20,11 +27,17 @@ export async function createImage(imageInputs: ImageInput[], spaceId: string) {
       spaceId,
       publicId: image.publicId,
       url: image.url,
+      bytes: image.bytes,
+      resolution: image.resolution,
+      format: image.format,
       createdAt: new Date(),
       updatedAt: new Date(),
     }));
 
-    const newImages = await db.insert(images).values(imagesToInsert).returning();
+    const newImages = await db
+      .insert(images)
+      .values(imagesToInsert)
+      .returning();
 
     return {
       message: 'Images inserted successfully',

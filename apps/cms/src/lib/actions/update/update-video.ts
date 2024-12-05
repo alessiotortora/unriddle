@@ -11,6 +11,8 @@ export async function updateVideo(
   assetId: string,
   videoId: string,
   identifier: string,
+  duration: number,
+  aspectRatio: string,
 ) {
   try {
     const existingVideo = await db.query.videos.findFirst({
@@ -26,6 +28,8 @@ export async function updateVideo(
       .set({
         playbackId: videoId,
         assetId: assetId,
+        duration: duration,
+        aspectRatio: aspectRatio,
         status: videoStatusEnum.enumValues[1], // 'ready'
         updatedAt: new Date(),
       })

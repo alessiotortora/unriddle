@@ -1,4 +1,4 @@
-import { jsonb, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
+import { integer, jsonb, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
 
 import { createdAt, updatedAt } from '@/utils/common-fields';
@@ -17,6 +17,7 @@ export const images = pgTable('images', {
   url: varchar({ length: 512 }).notNull(),
   resolution: jsonb(),
   format: varchar({ length: 256 }),
+  bytes: integer(),
   createdAt,
   updatedAt,
 });

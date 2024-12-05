@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
 import { Upload } from 'lucide-react';
+import { format } from 'path';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'sonner';
 
@@ -101,6 +102,12 @@ function FileUploader({ onUploadComplete, maxFiles = 5 }: FileUploaderProps) {
             const imagesToSave = results.map((result) => ({
               url: result.secure_url,
               publicId: result.public_id,
+              bytes: result.bytes,
+              resolution: {
+                width: result.width,
+                height: result.height,
+              },
+              format: result.format,
             }));
 
             await createImage(imagesToSave, params.spaceId as string);
@@ -152,7 +159,9 @@ function FileUploader({ onUploadComplete, maxFiles = 5 }: FileUploaderProps) {
 
   return (
     <div className="flex min-h-full flex-col items-end">
-      <div className={`flex h-36 w-full cursor-pointer items-center justify-center border border-dashed p-20 outline-none ${loading ? 'opacity-50' : ''}`}>
+      <div
+        className={`flex h-36 w-full cursor-pointer items-center justify-center border border-dashed p-20 outline-none ${loading ? 'opacity-50' : ''}`}
+      >
         <div {...getRootProps()} className="text-center">
           <input {...getInputProps()} />
           {loading ? (
@@ -170,7 +179,8 @@ function FileUploader({ onUploadComplete, maxFiles = 5 }: FileUploaderProps) {
               <Upload size={36} strokeWidth={1.5} />
               <p className="dropzone">
                 Drag & drop {maxFiles > 1 ? `up to ${maxFiles} ` : ''}
-                {maxFiles > 1 ? 'images/videos' : 'an image/video'} here or click to select
+                {maxFiles > 1 ? 'images/videos' : 'an image/video'} here or
+                click to select
               </p>
             </div>
           )}
@@ -194,7 +204,7 @@ function FileUploader({ onUploadComplete, maxFiles = 5 }: FileUploaderProps) {
       <aside className="mt-4 flex w-full flex-wrap justify-center">
         <FileThumbnail files={files} onRemove={handleRemoveFile} />
       </aside>
-    </div> 
+    </div>
   );
 }
 
