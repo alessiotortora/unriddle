@@ -9,15 +9,19 @@ export async function createVideo(
   bytes: number,
 ) {
   try {
-    await db.insert(videos).values({
-      spaceId,
-      assetId: '',
-      identifier,
-      playbackId: '',
-      bytes: bytes,
-      status: videoStatusEnum.enumValues[0],
-    });
-    console.log('Video created in the database');
+    const [video] = await db
+      .insert(videos)
+      .values({
+        spaceId,
+        assetId: '',
+        identifier,
+        playbackId: '',
+        bytes: bytes,
+        status: videoStatusEnum.enumValues[0],
+      })
+      .returning();
+
+    return video;
   } catch (error) {
     console.error('Error creating video:', error);
     throw new Error('Failed to create video');

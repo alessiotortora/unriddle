@@ -3,10 +3,13 @@
 // react
 import { useState } from 'react';
 
+import { useRouter } from 'next/navigation';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 // form
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -36,6 +39,7 @@ import { updateProject } from '@/lib/actions/update/update-project';
 // utils
 import { isRecordOfString } from '@/lib/utils';
 
+import { Project } from '../page';
 import { CoverSection } from './cover-section';
 import DetailsInput from './details-input';
 import MediaSection from './media-section';
@@ -46,7 +50,7 @@ import { TagInput } from './tag-input';
 type ProjectFormValues = z.infer<typeof formSchema>;
 
 interface ProjectFormProps {
-  projectData: any | null;
+  projectData: Project | null;
   images: Images[];
   videos: Video[];
 }
@@ -60,19 +64,27 @@ const formSchema = z.object({
   featured: z.boolean().default(false),
   details: z.record(z.string(), z.string()).nullable(),
   media: z
-    .array(z.object({ type: z.enum(['url', 'playbackId']), value: z.string() }))
+    .array(
+      z.object({
+        id: z.string().optional(),
+        type: z.enum(['url', 'playbackId']),
+        value: z.string(),
+      }),
+    )
     .max(8)
     .nullable(),
   coverMedia: z
     .array(
       z.object({
+        id: z.string(),
         type: z.enum(['url', 'playbackId']),
         value: z.string(),
       }),
     )
-    .optional(),
-  coverImageUrl: z.string().nullable(),
-  coverVideoPlaybackId: z.string().nullable(),
+    .max(1)
+    .nullable(),
+  coverImageId: z.string().nullable(),
+  coverVideoId: z.string().nullable(),
 });
 
 export default function ProjectForm({
@@ -80,13 +92,12 @@ export default function ProjectForm({
   images,
   videos,
 }: ProjectFormProps) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [tags, setTags] = useState<string[]>(projectData?.tags || []);
+  const [tags, setTags] = useState<string[]>(projectData?.content?.tags || []);
   const [details, setDetails] = useState<{ [key: string]: string }>(
     isRecordOfString(projectData?.details) ? projectData.details : {},
   );
-
-
 
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear - i);
@@ -97,33 +108,52 @@ export default function ProjectForm({
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: projectData?.content.title || '',
-      description: projectData?.description || '',
+      title: projectData?.content?.title || '',
+      description: projectData?.content?.description || '',
       year: projectData?.year || currentYear,
-      tags: projectData?.tags || [],
-      status: projectData?.status || 'draft',
+      tags: projectData?.content?.tags || [],
+      status: projectData?.content?.status || 'draft',
       featured: projectData?.featured ?? false,
       details: isRecordOfString(projectData?.details)
         ? projectData.details
         : null,
-      media: projectData
+      media: projectData?.content
         ? [
-            ...(projectData?.content.imagesToContent || []).map(
+            ...(projectData.content.imagesToContent || []).map(
               (image: any) => ({
+                id: image.imageId,
                 type: 'url' as const,
                 value: image.url,
               }),
             ),
-            ...(projectData?.content.videosToContent || []).map(
+            ...(projectData.content.videosToContent || []).map(
               (video: any) => ({
+                id: video.videoId,
                 type: 'playbackId' as const,
                 value: video.playbackId,
               }),
             ),
           ]
         : null,
-      coverImageUrl: projectData?.content.coverImageUrl || null,
-      coverVideoPlaybackId: projectData?.content.coverVideoPlaybackId || null,
+      coverMedia: projectData?.content?.coverImageId
+        ? [
+            {
+              id: projectData.content.coverImageId,
+              type: 'url',
+              value: projectData.content.coverImage?.url || '',
+            },
+          ]
+        : projectData?.content?.coverVideoId
+          ? [
+              {
+                id: projectData.content.coverVideoId,
+                type: 'playbackId',
+                value: projectData.content.coverVideo?.playbackId || '',
+              },
+            ]
+          : null,
+      coverImageId: projectData?.content?.coverImageId || null,
+      coverVideoId: projectData?.content?.coverVideoId || null,
     },
   });
 
@@ -133,45 +163,60 @@ export default function ProjectForm({
     values: ProjectFormValues,
     status: 'draft' | 'published',
   ) => {
-    setIsSubmitting(true);
-
-    console.log('Submitting project:', values);
-    try {
-      const images = values.media
-        ? values.media
-            .filter((item) => item.type === 'url')
-            .map((item) => item.value)
-        : [];
-      const videos = values.media
-        ? values.media
-            .filter((item) => item.type === 'playbackId')
-            .map((item) => item.value)
-        : [];
-
-      const payload = {
-        title: values.title,
-        description: values.description ?? null,
-        year: values.year ?? null,
-        tags: values.tags ?? [],
-        status,
-        coverImageUrl: values.coverImageUrl ?? null,
-        coverVideoPlaybackId: values.coverVideoPlaybackId ?? null,
-        details: values.details ?? {},
-        featured: values.featured ?? false,
-        images,
-        videos,
-      };
-
-      console.log('Submitting project:', payload);
-
-      await updateProject(projectData.id, payload);
-
-      console.log('Project updated successfully');
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsSubmitting(false);
+    if (isSubmitting) return;
+    if (!projectData) {
+      toast.error('No project data available');
+      return;
     }
+
+    const promise = new Promise(async (resolve, reject) => {
+      try {
+        setIsSubmitting(true);
+
+        const images = values.media
+          ? values.media
+              .filter((item) => item.type === 'url' && item.id)
+              .map((item) => item.id as string)
+          : null;
+        const videos = values.media
+          ? values.media
+              .filter((item) => item.type === 'playbackId' && item.id)
+              .map((item) => item.id as string)
+          : null;
+
+        const payload = {
+          title: values.title,
+          description: values.description ?? null,
+          year: values.year ?? null,
+          tags: values.tags ?? [],
+          status,
+          coverImageUrl: values.coverImageId ?? null,
+          coverVideoPlaybackId: values.coverVideoId ?? null,
+          details: values.details || null,
+          featured: values.featured ?? false,
+          images: images ?? null,
+          videos: videos ?? null,
+        };
+
+        await updateProject(projectData.contentId, payload);
+        resolve(status);
+      } catch (error) {
+        reject(error);
+      } finally {
+        setIsSubmitting(false);
+      }
+    });
+
+    toast.promise(promise, {
+      loading: status === 'published' ? 'Publishing...' : 'Saving...',
+      success: (status) => {
+        router.push(`/dashboard`);
+        return status === 'published'
+          ? 'Project published successfully!'
+          : 'Project saved successfully!';
+      },
+      error: 'Failed to save project',
+    });
   };
 
   return (
@@ -349,7 +394,22 @@ export default function ProjectForm({
             {/* Replace Media Items Field with MediaSection */}
             <MediaSection
               control={form.control}
-              initialMedia={projectData?.media || []}
+              initialMedia={[
+                ...(projectData?.content?.imagesToContent || []).map(
+                  (image: any) => ({
+                    id: image.imageId,
+                    type: 'url' as const,
+                    value: image.image.url,
+                  }),
+                ),
+                ...(projectData?.content?.videosToContent || []).map(
+                  (video: any) => ({
+                    id: video.videoId,
+                    type: 'playbackId' as const,
+                    value: video.video.playbackId,
+                  }),
+                ),
+              ]}
               images={images}
               videos={videos}
             />

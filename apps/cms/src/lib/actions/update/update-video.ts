@@ -35,8 +35,6 @@ export async function updateVideo(
       })
       .where(eq(videos.identifier, identifier));
 
-    console.log('Video updated in the database');
-
     // Revalidate the path after video is updated
     revalidatePath(`/${existingVideo.spaceId}/media`, 'layout');
   } catch (error) {

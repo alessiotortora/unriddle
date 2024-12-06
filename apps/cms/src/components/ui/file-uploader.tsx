@@ -27,6 +27,7 @@ interface SonnerProps {
 interface FileUploaderProps {
   onUploadComplete?: (
     items: {
+      id?: string;
       type: 'url' | 'playbackId';
       value: string | null;
       identifier?: string;
@@ -79,6 +80,7 @@ function FileUploader({ onUploadComplete, maxFiles = 5 }: FileUploaderProps) {
   const handleUpload = async (files: File[]) => {
     setLoading(true);
     const uploadedItems: {
+      id?: string;
       type: 'url' | 'playbackId';
       value: string | null;
       identifier?: string;
@@ -113,6 +115,7 @@ function FileUploader({ onUploadComplete, maxFiles = 5 }: FileUploaderProps) {
             await createImage(imagesToSave, params.spaceId as string);
             uploadedItems.push(
               ...results.map((r) => ({
+                id: r.id,
                 type: 'url' as const,
                 value: r.secure_url,
               })),
@@ -129,6 +132,7 @@ function FileUploader({ onUploadComplete, maxFiles = 5 }: FileUploaderProps) {
             );
             uploadedItems.push(
               ...results.map((r) => ({
+                id: r.id,
                 type: 'playbackId' as const,
                 value: null,
                 identifier: r.identifier,

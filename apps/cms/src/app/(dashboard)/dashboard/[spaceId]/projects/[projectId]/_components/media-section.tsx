@@ -43,8 +43,6 @@ export default function MediaSection({
     }[]
   >(initialMedia);
 
-  console.log('generalMediaValue', generalMediaValue);
-
   return (
     <FormField
       control={control}

@@ -25,37 +25,34 @@ export async function updateProject(
   },
 ) {
   try {
+    console.log('Raw Payload:', JSON.stringify(payload, null, 2));
+
     const contentPayload = {
       title: payload.title,
-      description: payload.description ?? null,
+      description: payload.description,
       status: payload.status,
-      tags: payload.tags ?? null,
-      coverImageId: payload.coverImageUrl ?? null,
-      coverVideoId: payload.coverVideoPlaybackId ?? null,
+      tags: payload.tags || [],
+      coverImageId: payload.coverImageUrl,
+      coverVideoId: payload.coverVideoPlaybackId,
     };
 
     const projectPayload = {
-      year: payload.year ?? null,
+      year: payload.year,
       featured: payload.featured,
-      details: payload.details ?? {},
+      details: payload.details || {},
     };
 
     await db.transaction(async (tx) => {
-      // Update content and project tables
-      console.log('Updating Content:', contentPayload);
       await tx
         .update(content)
         .set(contentPayload)
         .where(eq(content.id, projectId));
 
-      console.log('Updating Project:', projectPayload);
       await tx
         .update(projects)
         .set(projectPayload)
         .where(eq(projects.contentId, projectId));
 
-      // Always clear existing relationships first
-      console.log('Clearing Videos and Images for Project:', projectId);
       await tx
         .delete(videosToContent)
         .where(eq(videosToContent.contentId, projectId));
@@ -64,9 +61,7 @@ export async function updateProject(
         .delete(imagesToContent)
         .where(eq(imagesToContent.contentId, projectId));
 
-      // Insert new relationships if arrays are not empty
       if (payload.videos?.length) {
-        console.log('Inserting Videos:', payload.videos);
         await tx.insert(videosToContent).values(
           payload.videos.map((videoId) => ({
             videoId,

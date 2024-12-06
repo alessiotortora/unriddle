@@ -33,10 +33,10 @@ export const uploadToMux = async (
 
     if (!uploadResponse.ok) throw new Error('Upload failed');
 
-    await createVideo(spaceId as string, identifier, file.size);
+    const video = await createVideo(spaceId as string, identifier, file.size);
 
     // Return the identifier for tracking
-    return { status: uploadResponse.status, fileName: file.name, identifier };
+    return { status: uploadResponse.status, fileName: file.name, identifier, id: video.id };
   });
 
   // Wait for all videos to be uploaded

@@ -81,15 +81,15 @@ export function CoverSection({
                         const mediaItem = mediaItems[0];
                         if (mediaItem) {
                           if (mediaItem.type === 'url') {
-                            setValue('coverImageUrl', mediaItem.value);
-                            setValue('coverVideoPlaybackId', null);
+                            setValue('coverImageId', mediaItem.id);
+                            setValue('coverVideoId', null);
                           } else if (mediaItem.type === 'playbackId') {
-                            setValue('coverVideoPlaybackId', mediaItem.value);
-                            setValue('coverImageUrl', null);
+                            setValue('coverVideoId', mediaItem.id);
+                            setValue('coverImageId', null);
                           }
                         } else {
-                          setValue('coverImageUrl', null);
-                          setValue('coverVideoPlaybackId', null);
+                          setValue('coverImageId', null);
+                          setValue('coverVideoId', null);
                         }
                       }}
                       maxSelection={1}
@@ -102,8 +102,8 @@ export function CoverSection({
                         variant="outline"
                         onClick={() => {
                           field.onChange([]);
-                          setValue('coverImageUrl', null);
-                          setValue('coverVideoPlaybackId', null);
+                          setValue('coverImageId', null);
+                          setValue('coverVideoId', null);
                         }}
                       >
                         Remove

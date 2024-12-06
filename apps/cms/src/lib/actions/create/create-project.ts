@@ -22,7 +22,7 @@ export async function createProject(formData: { spaceId: string }) {
       // Create project using the content id
       await tx.insert(projects).values({
         contentId: contentResult.id,
-        year: new Date().getFullYear(), // Default to current year
+        year: new Date().getFullYear(), 
         featured: false,
         details: {},
       });

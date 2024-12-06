@@ -23,6 +23,7 @@ interface MediaSelectorProps {
   images: Images[];
   videos: Video[];
   value: {
+    id?: string;
     type: 'url' | 'playbackId';
     value: string | null;
     identifier?: string;
@@ -102,7 +103,6 @@ export const MediaSelector = ({
       value: string;
       identifier?: string;
     }) => {
-      console.log(mediaItem);
       const exists = value.some(
         (item) =>
           item.type === mediaItem.type && item.value === mediaItem.value,
@@ -293,9 +293,9 @@ const MediaThumbnail = ({
   thumbnailUrl: string;
   isSelected: boolean;
   onToggle: (item: {
+    id: string;
     type: 'url' | 'playbackId';
     value: string;
-    id: string;
   }) => void;
   isPending?: boolean;
 }) => {
