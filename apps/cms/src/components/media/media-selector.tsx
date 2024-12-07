@@ -7,7 +7,6 @@ import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import FileUploader from '@/components/ui/file-uploader';
 import {
   Popover,
   PopoverContent,
@@ -17,6 +16,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Image as Images, Video } from '@/db/schema';
 import { useRealtime } from '@/hooks/use-realtime';
+
+import FileUploader from './file-uploader';
 
 interface MediaSelectorProps {
   id?: string; // Add this prop

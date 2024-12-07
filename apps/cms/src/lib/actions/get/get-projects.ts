@@ -9,7 +9,12 @@ export async function getProjects() {
   try {
     const projectsData = await db.query.projects.findMany({
       with: {
-        content: true,
+        content: {
+          with: {
+            coverImage: true,
+            coverVideo: true,
+          },
+        },
       },
       orderBy: [desc(projects.createdAt)],
     });

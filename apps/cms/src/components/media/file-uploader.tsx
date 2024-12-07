@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
 import { Upload } from 'lucide-react';
-import { format } from 'path';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'sonner';
 
@@ -13,7 +12,7 @@ import { uploadToCloudinary } from '@/lib/actions/cloudinary';
 import { createImage } from '@/lib/actions/create/create-image';
 import { uploadToMux } from '@/lib/actions/mux';
 
-import { Button } from './button';
+import { Button } from '../ui/button';
 import FileThumbnail from './file-thumbnail';
 
 export interface FileWithPreview extends File {

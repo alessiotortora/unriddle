@@ -1,8 +1,9 @@
 import Image from 'next/image';
 
-import { Button } from './button';
+import { Button } from '@/components/ui/button';
+
+import Icon from '../ui/icon';
 import { FileWithPreview } from './file-uploader';
-import Icon from './icon';
 
 interface FileThumbnailProps {
   files: FileWithPreview[];

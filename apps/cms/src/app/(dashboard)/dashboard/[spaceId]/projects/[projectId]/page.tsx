@@ -4,8 +4,6 @@ import { getProject } from '@/lib/actions/get/get-project';
 
 import ProjectForm from './_components/project-form';
 
-// Create a new types file, e.g., apps/cms/src/types/project.ts
-
 export interface ProjectContent {
   title: string;
   description: string | null;

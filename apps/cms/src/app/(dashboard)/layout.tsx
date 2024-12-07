@@ -11,9 +11,10 @@ export default async function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
   const projects = await getProjects();
+  const recentProjects = projects.slice(0, 5);
   return (
     <SidebarProvider defaultOpen={true}>
-      <AppSidebar projects={projects} />
+      <AppSidebar projects={recentProjects} />
       <div className="w-full">
         <Header />
         <main className="mt-16 h-screen w-full flex-1 overflow-hidden">

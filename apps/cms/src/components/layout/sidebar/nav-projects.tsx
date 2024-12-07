@@ -30,6 +30,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { createProject } from '@/lib/actions/create/create-project';
+import Link from 'next/link';
 
 export function NavProjects({
   projects,
@@ -115,9 +116,14 @@ export function NavProjects({
           </SidebarMenuItem>
         ))}
         <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontal className="text-sidebar-foreground/70" />
-            <span>More</span>
+          <SidebarMenuButton asChild>
+            <Link 
+              href={`/dashboard/${params.spaceId}/projects`}
+              className="text-sidebar-foreground/70 hover:text-sidebar-foreground"
+            >
+              <MoreHorizontal />
+              <span>See All</span>
+            </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

@@ -24,8 +24,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Content } from '@/db/schema';
-import { Project } from '@/db/schema/projects';
+import { Content, Project } from '@/db/schema';
 import { useDialog } from '@/hooks/use-dialog';
 
 import { NavProjects } from './nav-projects';

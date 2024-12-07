@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 
-import { UseFormSetValue } from 'react-hook-form';
-
 import {
   FormControl,
   FormDescription,
@@ -28,7 +26,7 @@ interface MediaSectionProps {
   videos: Video[];
 }
 
-export default function MediaSection({
+export function MediaSection({
   control,
   initialMedia = [],
   images,

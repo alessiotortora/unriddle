@@ -1,17 +1,17 @@
 'use client';
 
-// react
-import { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-// form
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
+import { CoverSection } from '@/components/media/cover-section';
+import { MediaSection } from '@/components/media/media-section';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -23,7 +23,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-// components
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -33,19 +32,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { TagInput } from '@/components/ui/tag-input';
 import { Textarea } from '@/components/ui/textarea';
 import { Image as Images, Video } from '@/db/schema';
 import { updateProject } from '@/lib/actions/update/update-project';
-// utils
 import { isRecordOfString } from '@/lib/utils';
 
 import { Project } from '../page';
-import { CoverSection } from './cover-section';
 import DetailsInput from './details-input';
-import MediaSection from './media-section';
-import { MediaSelector } from './media-selector';
-// custom components
-import { TagInput } from './tag-input';
 
 type ProjectFormValues = z.infer<typeof formSchema>;
 
@@ -86,6 +80,9 @@ const formSchema = z.object({
   coverImageId: z.string().nullable(),
   coverVideoId: z.string().nullable(),
 });
+
+const MemoizedCoverSection = React.memo(CoverSection);
+const MemoizedMediaSection = React.memo(MediaSection);
 
 export default function ProjectForm({
   projectData,
@@ -159,72 +156,72 @@ export default function ProjectForm({
 
   const { setValue } = form;
 
-  const onSubmit = async (
-    values: ProjectFormValues,
-    status: 'draft' | 'published',
-  ) => {
-    if (isSubmitting) return;
-    if (!projectData) {
-      toast.error('No project data available');
-      return;
-    }
-
-    const promise = new Promise(async (resolve, reject) => {
-      try {
-        setIsSubmitting(true);
-
-        const images = values.media
-          ? values.media
-              .filter((item) => item.type === 'url' && item.id)
-              .map((item) => item.id as string)
-          : null;
-        const videos = values.media
-          ? values.media
-              .filter((item) => item.type === 'playbackId' && item.id)
-              .map((item) => item.id as string)
-          : null;
-
-        const payload = {
-          title: values.title,
-          description: values.description ?? null,
-          year: values.year ?? null,
-          tags: values.tags ?? [],
-          status,
-          coverImageUrl: values.coverImageId ?? null,
-          coverVideoPlaybackId: values.coverVideoId ?? null,
-          details: values.details || null,
-          featured: values.featured ?? false,
-          images: images ?? null,
-          videos: videos ?? null,
-        };
-
-        await updateProject(projectData.contentId, payload);
-        resolve(status);
-      } catch (error) {
-        reject(error);
-      } finally {
-        setIsSubmitting(false);
+  const handleSubmit = useCallback(
+    async (values: ProjectFormValues, status: 'draft' | 'published') => {
+      if (isSubmitting) return;
+      if (!projectData) {
+        toast.error('No project data available');
+        return;
       }
-    });
 
-    toast.promise(promise, {
-      loading: status === 'published' ? 'Publishing...' : 'Saving...',
-      success: (status) => {
-        router.push(`/dashboard`);
-        return status === 'published'
-          ? 'Project published successfully!'
-          : 'Project saved successfully!';
-      },
-      error: 'Failed to save project',
-    });
-  };
+      const promise = new Promise(async (resolve, reject) => {
+        try {
+          setIsSubmitting(true);
+
+          const images = values.media
+            ? values.media
+                .filter((item) => item.type === 'url' && item.id)
+                .map((item) => item.id as string)
+            : null;
+          const videos = values.media
+            ? values.media
+                .filter((item) => item.type === 'playbackId' && item.id)
+                .map((item) => item.id as string)
+            : null;
+
+          const payload = {
+            title: values.title,
+            description: values.description ?? null,
+            year: values.year ?? null,
+            tags: values.tags ?? [],
+            status,
+            coverImageUrl: values.coverImageId ?? null,
+            coverVideoPlaybackId: values.coverVideoId ?? null,
+            details: values.details || null,
+            featured: values.featured ?? false,
+            images: images ?? null,
+            videos: videos ?? null,
+          };
+
+          await updateProject(projectData.contentId, payload);
+          resolve(status);
+        } catch (error) {
+          reject(error);
+        } finally {
+          setIsSubmitting(false);
+        }
+      });
+
+      toast.promise(promise, {
+        loading: status === 'published' ? 'Publishing...' : 'Saving...',
+        success: (status) => {
+          router.push(`/dashboard`);
+          return status === 'published'
+            ? 'Project published successfully!'
+            : 'Project saved successfully!';
+        },
+        error: 'Failed to save project',
+      });
+    },
+    [projectData, router],
+  );
 
   return (
     <>
       <div>
         <Form {...form}>
           <form className="flex w-full flex-col gap-6">
-            <CoverSection
+            <MemoizedCoverSection
               control={form.control}
               images={images}
               videos={videos}
@@ -392,7 +389,7 @@ export default function ProjectForm({
               )}
             />
             {/* Replace Media Items Field with MediaSection */}
-            <MediaSection
+            <MemoizedMediaSection
               control={form.control}
               initialMedia={[
                 ...(projectData?.content?.imagesToContent || []).map(
@@ -426,7 +423,7 @@ export default function ProjectForm({
                   type="button"
                   variant="secondary"
                   onClick={form.handleSubmit((values) =>
-                    onSubmit(values, 'draft'),
+                    handleSubmit(values, 'draft'),
                   )}
                   disabled={isSubmitting}
                 >
@@ -436,7 +433,7 @@ export default function ProjectForm({
                   type="button"
                   variant="default"
                   onClick={form.handleSubmit((values) =>
-                    onSubmit(values, 'published'),
+                    handleSubmit(values, 'published'),
                   )}
                   disabled={isSubmitting}
                 >
