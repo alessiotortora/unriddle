@@ -14,7 +14,7 @@ async function ProjectsList() {
   return (
     <ProjectsGrid>
       {projects.map((project) => (
-        <ProjectCard key={project.contentId} project={project} />
+        <ProjectCard key={project.id} project={project} />
       ))}
     </ProjectsGrid>
   );

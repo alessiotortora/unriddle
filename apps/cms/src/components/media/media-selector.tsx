@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 
 import Image from 'next/image';
 
-import { Loader2 } from 'lucide-react';
+import { ImageIcon, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Image as Images, Video } from '@/db/schema';
 import { useRealtime } from '@/hooks/use-realtime';
+import { cn } from '@/lib/utils';
 
 import FileUploader from './file-uploader';
 
@@ -40,6 +41,7 @@ interface MediaSelectorProps {
   maxSelection?: number;
   title: string;
   side: 'top' | 'right' | 'bottom' | 'left';
+  variant?: 'ghost' | 'secondary';
 }
 
 const LoadingSpinner = () => (
@@ -57,8 +59,10 @@ export const MediaSelector = ({
   maxSelection = 8,
   title,
   side,
+  variant = 'secondary',
 }: MediaSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const hasSelection = value.length > 0;
 
   const valueRef = useRef(value);
 
@@ -128,6 +132,10 @@ export const MediaSelector = ({
         }
       }
 
+      if (maxSelection === 1 && newMediaItems.length === 1) {
+        setIsPopoverOpen(false);
+      }
+
       onChange(newMediaItems);
     },
     [value, maxSelection, onChange],
@@ -163,7 +171,6 @@ export const MediaSelector = ({
       onChange(newItems.slice(0, maxSelection));
     }
 
-    // Close the popover after successful upload
     setIsPopoverOpen(false);
   };
 
@@ -174,7 +181,15 @@ export const MediaSelector = ({
           asChild
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         >
-          <Button variant="secondary">
+          <Button
+            variant={variant}
+            size="sm"
+            className={cn(
+              'gap-1',
+              variant === 'ghost' ? 'text-muted-foreground' : '',
+            )}
+          >
+            {!hasSelection && <ImageIcon />}
             {title} {maxSelection > 1 && `${value.length}/${maxSelection}`}
           </Button>
         </PopoverTrigger>

@@ -112,7 +112,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
         <NavProjects
           projects={projects.map((project) => ({
             name: project.content.title?.trim() || 'New project',
-            url: `/dashboard/${project.content.spaceId}/projects/${project.contentId}`,
+            url: `/dashboard/${project.content.spaceId}/projects/${project.id}`,
             icon: File,
           }))}
         />

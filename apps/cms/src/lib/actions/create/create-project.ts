@@ -20,14 +20,20 @@ export async function createProject(formData: { spaceId: string }) {
         .returning({ id: content.id });
 
       // Create project using the content id
-      await tx.insert(projects).values({
-        contentId: contentResult.id,
-        year: new Date().getFullYear(), 
-        featured: false,
-        details: {},
-      });
+      const [projectResult] = await tx
+        .insert(projects)
+        .values({
+          contentId: contentResult.id,
+          year: new Date().getFullYear(),
+          featured: false,
+          details: {},
+        })
+        .returning({ id: projects.id });
 
-      return contentResult;
+      return {
+        contentId: contentResult.id,
+        projectId: projectResult.id,
+      };
     });
 
     revalidatePath(`/${formData.spaceId}/projects`);

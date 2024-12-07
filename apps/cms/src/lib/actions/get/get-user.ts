@@ -1,5 +1,7 @@
 'use server';
 
+
+
 import { eq } from 'drizzle-orm';
 
 import { db } from '@/db';
@@ -24,6 +26,7 @@ export async function getUser(): Promise<User | null> {
   if (user.length === 0) {
     return null;
   }
+
 
   return user[0];
 }

@@ -1,11 +1,15 @@
 'use server';
 
+
+
 import { db } from '@/db';
 
 export async function getProject(projectId: string) {
+
+
   try {
     const project = await db.query.projects.findFirst({
-      where: (projects, { eq }) => eq(projects.contentId, projectId),
+      where: (projects, { eq }) => eq(projects.id, projectId),
       with: {
         content: {
           with: {

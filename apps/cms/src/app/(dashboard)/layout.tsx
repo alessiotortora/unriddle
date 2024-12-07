@@ -10,7 +10,9 @@ interface DashboardLayoutProps {
 export default async function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
+ 
   const projects = await getProjects();
+  
   const recentProjects = projects.slice(0, 5);
   return (
     <SidebarProvider defaultOpen={true}>

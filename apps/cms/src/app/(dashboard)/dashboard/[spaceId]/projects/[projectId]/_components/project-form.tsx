@@ -193,7 +193,7 @@ export default function ProjectForm({
             videos: videos ?? null,
           };
 
-          await updateProject(projectData.contentId, payload);
+          await updateProject(projectData.id, projectData.contentId, payload);
           resolve(status);
         } catch (error) {
           reject(error);

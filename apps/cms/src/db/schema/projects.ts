@@ -6,8 +6,9 @@ import { createdAt, updatedAt } from '@/utils/common-fields';
 import { content } from './content';
 
 export const projects = pgTable('projects', {
+  id: uuid().primaryKey().notNull().defaultRandom(),
   contentId: uuid()
-    .primaryKey()
+    .notNull()
     .references(() => content.id, { onDelete: 'cascade' }),
   year: integer(),
   featured: boolean().default(false),

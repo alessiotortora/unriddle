@@ -10,6 +10,7 @@ import { imagesToContent } from '@/db/schema';
 
 export async function updateProject(
   projectId: string,
+  contentId: string,
   payload: {
     title: string;
     description: string | null;
@@ -25,8 +26,6 @@ export async function updateProject(
   },
 ) {
   try {
-    console.log('Raw Payload:', JSON.stringify(payload, null, 2));
-
     const contentPayload = {
       title: payload.title,
       description: payload.description,
@@ -46,36 +45,35 @@ export async function updateProject(
       await tx
         .update(content)
         .set(contentPayload)
-        .where(eq(content.id, projectId));
+        .where(eq(content.id, contentId));
 
       await tx
         .update(projects)
         .set(projectPayload)
-        .where(eq(projects.contentId, projectId));
+        .where(eq(projects.id, projectId));
 
       await tx
         .delete(videosToContent)
-        .where(eq(videosToContent.contentId, projectId));
+        .where(eq(videosToContent.contentId, contentId));
 
       await tx
         .delete(imagesToContent)
-        .where(eq(imagesToContent.contentId, projectId));
+        .where(eq(imagesToContent.contentId, contentId));
 
       if (payload.videos?.length) {
         await tx.insert(videosToContent).values(
           payload.videos.map((videoId) => ({
             videoId,
-            contentId: projectId,
+            contentId: contentId,
           })),
         );
       }
 
       if (payload.images?.length) {
-        console.log('Inserting Images:', payload.images);
         await tx.insert(imagesToContent).values(
           payload.images.map((imageId) => ({
             imageId,
-            contentId: projectId,
+            contentId: contentId,
           })),
         );
       }

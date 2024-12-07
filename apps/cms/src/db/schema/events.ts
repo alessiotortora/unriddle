@@ -1,6 +1,3 @@
-import { images } from './images';
-import { spaces } from './spaces';
-import { createdAt, updatedAt } from '@/utils/common-fields';
 import {
   jsonb,
   pgEnum,
@@ -11,6 +8,11 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
+
+import { createdAt, updatedAt } from '@/utils/common-fields';
+
+import { images } from './images';
+import { spaces } from './spaces';
 
 export const eventTypeEnum = pgEnum('event_type', [
   'exhibition',

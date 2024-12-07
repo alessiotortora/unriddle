@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 
 import { User } from '@/db/schema';
 import { useUser } from '@/hooks/use-user';
@@ -10,18 +10,28 @@ interface UserProviderProps {
   children: React.ReactNode;
 }
 
-export function UserProvider({ children, initialUser }: UserProviderProps) {
-  const { setUser, resetUser } = useUser();
+function UserProviderComponent({ children, initialUser }: UserProviderProps) {
+  const { setUser, resetUser, user } = useUser();
 
+  // Only update user state if it actually changed
   useEffect(() => {
-    if (initialUser) {
-      setUser(initialUser);
-    } else {
-      resetUser();
-    }
-  }, [initialUser]);
+    const currentUserJson = JSON.stringify(user);
+    const initialUserJson = JSON.stringify(initialUser);
 
-  return <>{children}</>;
+    if (currentUserJson !== initialUserJson) {
+  
+      if (initialUser) {
+        setUser(initialUser);
+      } else {
+        resetUser();
+      }
+    }
+  }, [initialUser, setUser, resetUser, user]);
+
+  return children;
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export const UserProvider = memo(UserProviderComponent);
 
 export default UserProvider;

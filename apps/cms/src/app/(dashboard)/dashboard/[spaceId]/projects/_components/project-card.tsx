@@ -2,12 +2,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { format } from 'date-fns';
+import { File } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
 interface ProjectCardProps {
   project: {
+    id: string;
     contentId: string;
     year: number | null;
     featured: boolean | null;
@@ -34,9 +36,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
     : coverImage;
 
   return (
-    <Link
-      href={`/dashboard/${project.content.spaceId}/projects/${project.contentId}`}
-    >
+    <Link href={`/dashboard/${project.content.spaceId}/projects/${project.id}`}>
       <Card className="hover:border-primary group overflow-hidden transition-colors">
         <div className="relative aspect-video w-full overflow-hidden">
           {thumbnailUrl ? (
@@ -47,29 +47,26 @@ export function ProjectCard({ project }: ProjectCardProps) {
               className="object-cover transition-transform group-hover:scale-105"
             />
           ) : (
-            <div className="bg-muted flex h-full w-full items-center justify-center">
-              No cover image
-            </div>
+            <div className="bg-muted flex h-full w-full" />
           )}
-          <div className="absolute right-2 top-2">
+        </div>
+
+        <CardContent className="relative p-4">
+          <div className="absolute left-3 top-[-12px]">
+            <File className="text-muted-foreground fill-background" size={24} />
+          </div>
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold">{project.content.title}</h3>
             <Badge
               variant={
-                project.content.status === 'published' ? 'default' : 'secondary'
+                project.content.status === 'published' ? 'secondary' : 'outline'
               }
             >
               {project.content.status}
             </Badge>
           </div>
-        </div>
-        <CardContent className="p-4">
-          <h3 className="font-semibold">{project.content.title}</h3>
-          {project.content.description && (
-            <p className="text-muted-foreground mt-2 line-clamp-2">
-              {project.content.description}
-            </p>
-          )}
         </CardContent>
-        <CardFooter className="text-muted-foreground p-4 pt-0 text-sm">
+        <CardFooter className="text-muted-foreground p-4 pt-0 text-xs">
           Last updated {format(new Date(project.updatedAt), 'MMM d, yyyy')}
         </CardFooter>
       </Card>

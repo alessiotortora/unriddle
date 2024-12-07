@@ -1,11 +1,14 @@
-import { content } from './content';
-import { createdAt, updatedAt } from '@/utils/common-fields';
 import { pgTable, text, uuid, varchar } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
 
+import { createdAt, updatedAt } from '@/utils/common-fields';
+
+import { content } from './content';
+
 export const blogPosts = pgTable('blog_posts', {
+  id: uuid().primaryKey().notNull().defaultRandom(),
   contentId: uuid()
-    .primaryKey()
+    .notNull()
     .references(() => content.id, { onDelete: 'cascade' }),
   author: varchar({ length: 256 }),
   body: text().notNull(),

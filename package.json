@@ -11,7 +11,7 @@
     "lint": "turbo run lint",
     "format": "turbo run format"
   },
-   "packageManager": "yarn@1.22.22",
+  "packageManager": "yarn@1.22.22",
   "devDependencies": {
     "turbo": "^2.3.0"
   }

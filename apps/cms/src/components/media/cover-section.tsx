@@ -2,12 +2,13 @@
 
 import Image from 'next/image';
 
-import { Loader2 } from 'lucide-react';
+import { Image as ImageIcon, Loader2 } from 'lucide-react';
 import { UseFormSetValue } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem } from '@/components/ui/form';
 import { Image as Images, Video } from '@/db/schema';
+import { cn } from '@/lib/utils';
 
 import { MediaSelector } from './media-selector';
 
@@ -42,33 +43,38 @@ export function CoverSection({
             <FormItem className="h-full w-full">
               <FormControl>
                 <div className="relative h-full w-full">
-                  {selectedCoverMedia ? (
-                    !selectedCoverMedia.value ||
-                    (selectedCoverMedia.type === 'playbackId' &&
-                      !selectedCoverMedia.value) ? (
-                      <LoadingSpinner />
-                    ) : selectedCoverMedia.type === 'url' ? (
-                      <Image
-                        src={selectedCoverMedia.value || ''}
-                        fill
-                        alt="Selected Media"
-                        className="rounded-md object-cover"
-                      />
-                    ) : (
-                      <Image
-                        src={`https://image.mux.com/${selectedCoverMedia.value}/thumbnail.webp`}
-                        fill
-                        alt="Selected Media GIF"
-                        className="rounded-md object-cover"
-                      />
-                    )
-                  ) : (
-                    <span className="text-muted-foreground">
-                      Please add a cover by selecting a media item.
-                    </span>
+                  {selectedCoverMedia && (
+                    <>
+                      {!selectedCoverMedia.value ||
+                      (selectedCoverMedia.type === 'playbackId' &&
+                        !selectedCoverMedia.value) ? (
+                        <LoadingSpinner />
+                      ) : selectedCoverMedia.type === 'url' ? (
+                        <Image
+                          src={selectedCoverMedia.value || ''}
+                          fill
+                          alt="Selected Media"
+                          className="rounded-md object-cover"
+                        />
+                      ) : (
+                        <Image
+                          src={`https://image.mux.com/${selectedCoverMedia.value}/thumbnail.webp`}
+                          fill
+                          alt="Selected Media GIF"
+                          className="rounded-md object-cover"
+                        />
+                      )}
+                    </>
                   )}
 
-                  <div className="absolute right-2 top-2 flex gap-2">
+                  <div
+                    className={cn(
+                      'flex gap-2',
+                      selectedCoverMedia
+                        ? 'absolute right-2 top-2'
+                        : 'absolute inset-0 items-center justify-center',
+                    )}
+                  >
                     <MediaSelector
                       id="cover"
                       images={images}
@@ -92,7 +98,8 @@ export function CoverSection({
                       }}
                       maxSelection={1}
                       title={selectedCoverMedia ? 'Change Cover' : 'Add Cover'}
-                      side="left"
+                      side={selectedCoverMedia ? 'left' : 'bottom'}
+                      variant={selectedCoverMedia ? 'secondary' : 'ghost'}
                     />
                     {selectedCoverMedia && (
                       <Button

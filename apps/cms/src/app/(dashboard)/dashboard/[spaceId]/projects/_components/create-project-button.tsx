@@ -1,6 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
+
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -29,7 +30,7 @@ export function CreateProjectButton() {
 
       toast.success('Project created successfully');
       router.refresh();
-      router.push(`/dashboard/${spaceId}/projects/${response.data.id}`);
+      router.push(`/dashboard/${spaceId}/projects/${response.data.projectId}`);
     } catch (error) {
       toast.error('Failed to create project');
     }
@@ -41,4 +42,4 @@ export function CreateProjectButton() {
       New Project
     </Button>
   );
-} 
+}

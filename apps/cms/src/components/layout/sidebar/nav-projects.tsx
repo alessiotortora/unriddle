@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 
 import {
@@ -30,7 +31,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { createProject } from '@/lib/actions/create/create-project';
-import Link from 'next/link';
 
 export function NavProjects({
   projects,
@@ -65,7 +65,7 @@ export function NavProjects({
 
       toast.success('Project created successfully');
       router.refresh();
-      router.push(`/dashboard/${spaceId}/projects/${response.data.id}`);
+      router.push(`/dashboard/${spaceId}/projects/${response.data.projectId}`);
     } catch (error) {
       toast.error('Failed to create project');
     }
@@ -115,17 +115,19 @@ export function NavProjects({
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        <SidebarMenuItem>
-          <SidebarMenuButton asChild>
-            <Link 
-              href={`/dashboard/${params.spaceId}/projects`}
-              className="text-sidebar-foreground/70 hover:text-sidebar-foreground"
-            >
-              <MoreHorizontal />
-              <span>See All</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+        {projects.length > 0 && (
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link
+                href={`/dashboard/${params.spaceId}/projects`}
+                className="text-sidebar-foreground/70 hover:text-sidebar-foreground"
+              >
+                <MoreHorizontal />
+                <span>See All</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
       </SidebarMenu>
     </SidebarGroup>
   );
