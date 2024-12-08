@@ -1,8 +1,9 @@
 'use client';
 
+import * as React from 'react';
+
 import { useRouter } from 'next/navigation';
 
-import { on } from 'events';
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react';
 
 import { SignOut } from '@/app/(auth)/actions';
@@ -27,10 +28,16 @@ import { useUser } from '@/hooks/use-user';
 
 export function NavUser() {
   const { isMobile } = useSidebar();
+  const { onOpen } = useDialog();
   const user = useUser((state) => state.user);
   const resetUser = useUser((state) => state.resetUser);
   const router = useRouter();
-  const { onOpen } = useDialog();
+
+  if (!user) return null;
+
+  const handleSettingsClick = () => {
+    onOpen('settings', { user });
+  };
 
   async function handleLogout() {
     resetUser();
@@ -80,7 +87,7 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => onOpen('settings')}>
+              <DropdownMenuItem onClick={handleSettingsClick}>
                 <BadgeCheck />
                 Settings
               </DropdownMenuItem>

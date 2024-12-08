@@ -46,12 +46,13 @@ export interface Project {
 export default async function ProjectPage({
   params,
 }: {
-  params: { spaceId: string; projectId: string };
+  params: Promise<{ spaceId: string; projectId: string }>;
 }) {
-  const resolvedParams = await params;
+  const projectId = (await params).projectId;
+  const spaceId = (await params).spaceId;
   const [project, mediaItems] = await Promise.all([
-    getProject(resolvedParams.projectId) as Promise<Project | null>,
-    getMedia(resolvedParams.spaceId),
+    getProject(projectId) as Promise<Project | null>,
+    getMedia(spaceId),
   ]);
 
   return (

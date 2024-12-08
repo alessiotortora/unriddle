@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Content, Project } from '@/db/schema';
 import { useDialog } from '@/hooks/use-dialog';
+import { useUser } from '@/hooks/use-user';
 
 import { NavProjects } from './nav-projects';
 import { NavSecondary } from './nav-secondary';
@@ -59,6 +60,12 @@ interface AppSidebarProps {
 export function AppSidebar({ projects }: AppSidebarProps) {
   const { onOpen } = useDialog();
   const { open } = useSidebar();
+  const user = useUser((state) => state.user);
+
+  const handleSettingsClick = () => {
+    onOpen('settings', { user });
+  };
+
   return (
     <Sidebar collapsible="icon" side="left" variant="sidebar">
       <SidebarHeader>
@@ -70,8 +77,8 @@ export function AppSidebar({ projects }: AppSidebarProps) {
                   <GalleryVerticalEnd className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">Documentation</span>
-                  <span className="">v1.0.0</span>
+                  <span className="truncate font-semibold">Documentation</span>
+                  <span className="truncate text-xs">v1.0.0</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -99,7 +106,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip={{ children: settingsItem.title, hidden: open }}
-                  onClick={() => onOpen('settings')}
+                  onClick={handleSettingsClick}
                 >
                   <settingsItem.icon />
                   <span>{settingsItem.title}</span>

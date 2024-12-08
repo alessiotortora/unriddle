@@ -7,19 +7,19 @@ import { useDialog } from '@/hooks/use-dialog';
 import { ProjectDialog } from '../dialogs/project-dialog';
 import { SettingsDialog } from '../dialogs/settings-dialog';
 
-export const DialogProvider = () => {
-  const [isMounted, setIsMounted] = useState(false);
-  const { dialogType, onClose } = useDialog();
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) return null;
+export function DialogProvider() {
+  const { isOpen, type, onClose, props } = useDialog();
 
   return (
     <>
-      <SettingsDialog isOpen={dialogType === 'settings'} onClose={onClose} />
+      {type === 'settings' && (
+        <SettingsDialog 
+          isOpen={isOpen} 
+          onClose={onClose} 
+          user={props?.user} 
+        />
+      )}
+      {/* other dialogs... */}
     </>
   );
-};
+}

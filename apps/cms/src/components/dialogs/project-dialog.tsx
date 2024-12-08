@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { useParams, useRouter } from 'next/navigation';
 
@@ -77,7 +77,7 @@ export const ProjectDialog = ({
       toast.success('Project created successfully');
       onClose();
       router.refresh();
-      router.push(`/dashboard/${spaceId}/projects/${response.data.id}`);
+      router.push(`/dashboard/${spaceId}/projects/${response.data.projectId}`);
     } catch (error) {
       toast.error('Failed to create project');
     } finally {

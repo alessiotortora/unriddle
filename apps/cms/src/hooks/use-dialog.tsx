@@ -1,19 +1,21 @@
 import { create } from 'zustand';
 
-type DialogType = 'store' | 'project' | 'settings' | null;
+type DialogType = 'settings' | 'project' | null;
 
 interface DialogState {
-  dialogType: DialogType;
-  onOpen: (type: DialogType) => void;
-  onClose: () => void;
+  type: DialogType;
+  props?: Record<string, any>;
   isOpen: boolean;
+  onOpen: (type: DialogType, props?: Record<string, any>) => void;
+  onClose: () => void;
 }
 
-export const useDialog = create<DialogState>((set, get) => ({
-  dialogType: null,
-  onOpen: (type) => set({ dialogType: type }),
-  onClose: () => set({ dialogType: null }),
-  get isOpen() {
-    return get().dialogType !== null;
+export const useDialog = create<DialogState>((set) => ({
+  type: null,
+  props: undefined,
+  isOpen: false,
+  onOpen: (type, props) => {
+    set({ isOpen: true, type, props });
   },
+  onClose: () => set({ isOpen: false, type: null, props: undefined }),
 }));
