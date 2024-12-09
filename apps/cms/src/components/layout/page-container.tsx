@@ -11,7 +11,7 @@ export default function PageContainer({
   return (
     <>
       {scrollable ? (
-        <ScrollArea className="h-screen">
+        <ScrollArea className="faded-bottom h-screen">
           <div className="h-full px-4 pb-32 pt-4 md:px-8">{children}</div>
         </ScrollArea>
       ) : (

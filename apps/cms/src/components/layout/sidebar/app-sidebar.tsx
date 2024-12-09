@@ -3,12 +3,15 @@
 import Link from 'next/link';
 
 import {
+  CalendarFold,
   File,
-  GalleryVerticalEnd,
+  Files,
   LayoutDashboardIcon,
   LifeBuoy,
+  Puzzle,
   Send,
   Settings,
+  SettingsIcon,
 } from 'lucide-react';
 
 import {
@@ -34,18 +37,15 @@ import { NavUser } from './nav-user';
 
 const items = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboardIcon },
+  { title: 'Projects', url: '/dashboard/projects', icon: Files },
+  { title: 'Events', url: '/dashboard/events', icon: CalendarFold },
 ];
 
 const navSecondary = [
   {
-    title: 'Support',
+    title: 'Settings',
     url: '#',
-    icon: LifeBuoy,
-  },
-  {
-    title: 'Feedback',
-    url: '#',
-    icon: Send,
+    icon: SettingsIcon,
   },
 ];
 const settingsItem = {
@@ -74,10 +74,12 @@ export function AppSidebar({ projects }: AppSidebarProps) {
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <GalleryVerticalEnd className="size-4" />
+                  <Puzzle className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="truncate font-semibold">Documentation</span>
+                  <span className="truncate font-semibold">
+                    {user?.firstName}
+                  </span>
                   <span className="truncate text-xs">v1.0.0</span>
                 </div>
               </a>
@@ -87,7 +89,7 @@ export function AppSidebar({ projects }: AppSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>General</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (

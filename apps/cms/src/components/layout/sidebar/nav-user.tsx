@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react';
+import { ChevronsUpDown, LogOut, SettingsIcon } from 'lucide-react';
 
 import { SignOut } from '@/app/(auth)/actions';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -55,7 +55,9 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {user?.firstName?.charAt(0)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
@@ -75,7 +77,9 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {user?.firstName?.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
@@ -88,7 +92,7 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={handleSettingsClick}>
-                <BadgeCheck />
+                <SettingsIcon />
                 Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
