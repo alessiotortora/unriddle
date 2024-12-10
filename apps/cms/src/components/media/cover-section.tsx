@@ -42,7 +42,7 @@ export function CoverSection({
           return (
             <FormItem className="h-full w-full">
               <FormControl>
-                <div className="relative h-full w-full">
+                <div className="bg-muted relative h-full w-full rounded-lg">
                   {selectedCoverMedia && (
                     <>
                       {!selectedCoverMedia.value ||

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 import {
   CalendarFold,
@@ -35,12 +36,6 @@ import { NavProjects } from './nav-projects';
 import { NavSecondary } from './nav-secondary';
 import { NavUser } from './nav-user';
 
-const items = [
-  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboardIcon },
-  { title: 'Projects', url: '/dashboard/projects', icon: Files },
-  { title: 'Events', url: '/dashboard/events', icon: CalendarFold },
-];
-
 const navSecondary = [
   {
     title: 'Settings',
@@ -60,11 +55,22 @@ interface AppSidebarProps {
 export function AppSidebar({ projects }: AppSidebarProps) {
   const { onOpen } = useDialog();
   const { open } = useSidebar();
+  const { spaceId } = useParams();
   const user = useUser((state) => state.user);
 
   const handleSettingsClick = () => {
     onOpen('settings', { user });
   };
+
+  const items = [
+    { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboardIcon },
+    { title: 'Projects', url: `/dashboard/${spaceId}/projects`, icon: Files },
+    {
+      title: 'Events',
+      url: `/dashboard/${spaceId}/events`,
+      icon: CalendarFold,
+    },
+  ];
 
   return (
     <Sidebar collapsible="icon" side="left" variant="sidebar">
@@ -73,8 +79,8 @@ export function AppSidebar({ projects }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Puzzle className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <Puzzle className="size-5" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="truncate font-semibold">

@@ -3,7 +3,7 @@
 import { eq } from 'drizzle-orm';
 
 import { db } from '@/db';
-import { User, users } from '@/db/schema';
+import { users } from '@/db/schema';
 import { createClient } from '@/utils/supabase/server';
 
 export async function getUser() {

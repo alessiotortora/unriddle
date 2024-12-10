@@ -5,26 +5,21 @@ import { format } from 'date-fns';
 import { File, Trash2 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import {
+  Content,
+  Image as ImageType,
+  Project,
+  Video as VideoType,
+} from '@/db/schema';
 
 import { DeleteProjectButton } from './delete-project-button';
 
 interface ProjectCardProps {
-  project: {
-    id: string;
-    contentId: string;
-    year: number | null;
-    featured: boolean | null;
-    updatedAt: Date;
-    content: {
-      id: string;
-      spaceId: string;
-      title: string | null;
-      description: string | null;
-      status: 'draft' | 'published' | 'archived' | null;
-      coverImage: { url: string | null } | null;
-      coverVideo: { playbackId: string | null } | null;
+  project: Project & {
+    content: Content & {
+      coverImage: ImageType | null;
+      coverVideo: VideoType | null;
     };
   };
 }
@@ -43,7 +38,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <Link
         href={`/dashboard/${project.content.spaceId}/projects/${project.id}`}
       >
-        <Card className="hover:border-primary group relative overflow-hidden transition-colors">
+        <Card className="group relative overflow-hidden transition-colors hover:shadow-md">
           <div className="relative aspect-video w-full overflow-hidden">
             {thumbnailUrl ? (
               <Image

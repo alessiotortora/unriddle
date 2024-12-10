@@ -1,7 +1,8 @@
-import { content } from './content';
-import { videos } from './videos';
 import { pgTable, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
+
+import { content } from './content';
+import { videos } from './videos';
 
 export const videosToContent = pgTable('videos_to_content', {
   videoId: uuid()
@@ -25,3 +26,6 @@ export const videosToContentRelations = relations(
     }),
   }),
 );
+
+export type VideosToContent = typeof videosToContent.$inferSelect;
+export type NewVideosToContent = typeof videosToContent.$inferInsert;

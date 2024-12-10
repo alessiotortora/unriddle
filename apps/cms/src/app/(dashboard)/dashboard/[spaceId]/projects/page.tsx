@@ -1,12 +1,12 @@
 import { Suspense } from 'react';
 
+import { Heading } from '@/components/layout/heading';
 import PageContainer from '@/components/layout/page-container';
 import { getProjects } from '@/lib/actions/get/get-projects';
 
 import { CreateProjectButton } from './_components/create-project-button';
 import { ProjectCard } from './_components/project-card';
 import { ProjectsGrid } from './_components/projects-grid';
-import { ProjectsHeader } from './_components/projects-header';
 
 async function ProjectsList() {
   const projects = await getProjects();
@@ -25,7 +25,10 @@ export default function ProjectsPage() {
     <PageContainer scrollable>
       <div className="flex h-full flex-col space-y-8">
         <div className="flex items-center justify-between">
-          <ProjectsHeader />
+          <Heading
+            title="Projects"
+            description="Manage and organize your projects"
+          />
           <CreateProjectButton />
         </div>
 

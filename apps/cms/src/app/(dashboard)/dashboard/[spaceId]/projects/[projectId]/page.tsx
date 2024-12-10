@@ -1,47 +1,29 @@
 import PageContainer from '@/components/layout/page-container';
+import {
+  Content,
+  Image as ImageType,
+  ImagesToContent,
+  Project,
+  Video as VideoType,
+  VideosToContent,
+} from '@/db/schema';
 import { getMedia } from '@/lib/actions/get/get-media';
 import { getProject } from '@/lib/actions/get/get-project';
 
 import ProjectForm from './_components/project-form';
 
-export interface ProjectContent {
-  title: string;
-  description: string | null;
-  status: 'draft' | 'published' | 'archived';
-  tags: string[];
-  coverImageId: string | null;
-  coverVideoId: string | null;
-  coverImage?: {
-    url: string;
+export type ProjectWithRelations = Project & {
+  content: Content & {
+    coverImage: ImageType | null;
+    coverVideo: VideoType | null;
+    imagesToContent: (ImagesToContent & {
+      image: ImageType;
+    })[];
+    videosToContent: (VideosToContent & {
+      video: VideoType;
+    })[];
   };
-  coverVideo?: {
-    playbackId: string;
-  };
-  imagesToContent: {
-    imageId: string;
-    url: string;
-    image: {
-      url: string;
-    };
-  }[];
-  videosToContent: {
-    videoId: string;
-    playbackId: string;
-    video: {
-      playbackId: string;
-    };
-  }[];
-}
-
-export interface Project {
-  id: string;
-  contentId: string;
-  content: ProjectContent;
-  year: number | null;
-  featured: boolean;
-  details: Record<string, string>;
-  updatedAt: Date;
-}
+};
 
 export default async function ProjectPage({
   params,
@@ -51,7 +33,7 @@ export default async function ProjectPage({
   const projectId = (await params).projectId;
   const spaceId = (await params).spaceId;
   const [project, mediaItems] = await Promise.all([
-    getProject(projectId) as Promise<Project | null>,
+    getProject(projectId) as Promise<ProjectWithRelations | null>,
     getMedia(spaceId),
   ]);
 

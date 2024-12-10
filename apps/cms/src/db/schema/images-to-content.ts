@@ -1,7 +1,8 @@
-import { content } from './content';
-import { images } from './images';
 import { pgTable, uuid } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm/relations';
+
+import { content } from './content';
+import { images } from './images';
 
 export const imagesToContent = pgTable('images_to_content', {
   imageId: uuid()
@@ -25,3 +26,6 @@ export const imagesToContentRelations = relations(
     }),
   }),
 );
+
+export type ImagesToContent = typeof imagesToContent.$inferSelect;
+export type NewImagesToContent = typeof imagesToContent.$inferInsert;

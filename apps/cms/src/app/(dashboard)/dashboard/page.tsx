@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { getFirstSpace } from '@/lib/actions/get/get-first-space';
 import { getUser } from '@/lib/actions/get/get-user';
 
-export default async function DashboardPage() {
+export default async function DashboardRedirectPage() {
   const user = await getUser();
 
   if (!user) {

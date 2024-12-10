@@ -38,13 +38,13 @@ import { Image as Images, Video } from '@/db/schema';
 import { updateProject } from '@/lib/actions/update/update-project';
 import { isRecordOfString } from '@/lib/utils';
 
-import { Project } from '../page';
+import { ProjectWithRelations } from '../page';
 import DetailsInput from './details-input';
 
 type ProjectFormValues = z.infer<typeof formSchema>;
 
 interface ProjectFormProps {
-  projectData: Project | null;
+  projectData: ProjectWithRelations | null;
   images: Images[];
   videos: Video[];
 }
@@ -227,190 +227,190 @@ export default function ProjectForm({
               videos={videos}
               setValue={setValue}
             />
+            <div className="md:mx-8">
+              <div className="flex justify-between gap-2">
+                {/* Name Field */}
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem className="w-1/2">
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={'Enter project title'}
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter the name of the project
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <div className="flex justify-between gap-2">
-              {/* Name Field */}
+                {/* Year Field */}
+                <FormField
+                  control={form.control}
+                  name="year"
+                  render={({ field }) => (
+                    <FormItem className="w-1/2">
+                      <FormLabel>Year</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) =>
+                            field.onChange(parseInt(value))
+                          }
+                          defaultValue={
+                            field.value?.toString() || currentYear.toString()
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Year" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {yearOptions.map((year) => (
+                              <SelectItem key={year} value={year.toString()}>
+                                {year}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormDescription>
+                        Choose the year when the project was completed.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Description Field */}
               <FormField
                 control={form.control}
-                name="title"
+                name="description"
                 render={({ field }) => (
-                  <FormItem className="w-1/2">
-                    <FormLabel>Title</FormLabel>
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder={'Enter project title'}
+                      <Textarea
                         {...field}
-                        value={field.value || ''}
+                        placeholder="Enter project description"
+                        className="w-full rounded-md border border-gray-300 p-2"
                       />
                     </FormControl>
                     <FormDescription>
-                      Enter the name of the project
+                      Provide a brief description of the project.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Year Field */}
+              {/* Tags Field */}
               <FormField
                 control={form.control}
-                name="year"
+                name="tags"
                 render={({ field }) => (
-                  <FormItem className="w-1/2">
-                    <FormLabel>Year</FormLabel>
+                  <FormItem>
+                    <FormLabel>Tags</FormLabel>
                     <FormControl>
-                      <Select
-                        onValueChange={(value) =>
-                          field.onChange(parseInt(value))
-                        }
-                        defaultValue={
-                          field.value?.toString() || currentYear.toString()
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Year" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {yearOptions.map((year) => (
-                            <SelectItem key={year} value={year.toString()}>
-                              {year}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <TagInput
+                        {...field}
+                        placeholder="e.g., design, marketing, video, software"
+                        tags={tags}
+                        className="sm:min-w-[450px]"
+                        setTags={(newTags) => {
+                          setTags(newTags);
+                          setValue('tags', newTags as [string, ...string[]]);
+                        }}
+                      />
                     </FormControl>
                     <FormDescription>
-                      Choose the year when the project was completed.
+                      Add keywords that describe your project. This will help
+                      others find it. Example tags could include: industry, type
+                      of work, or technology used.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
+              />
+              {/* Featured Field */}
+              <FormField
+                control={form.control}
+                name="featured"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Featured</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center justify-start gap-2">
+                        <Checkbox
+                          checked={field.value ?? false}
+                          onCheckedChange={field.onChange}
+                        />
+                        <Label className="text-foreground">
+                          Mark as Featured
+                        </Label>
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Mark this project as a featured item. Featured projects
+                      are highlighted for better visibility.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Details Field */}
+              <FormField
+                control={form.control}
+                name="details"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Details</FormLabel>
+                    <FormControl>
+                      <DetailsInput
+                        details={details}
+                        setDetails={(newDetails) => {
+                          setDetails(newDetails);
+                          field.onChange(newDetails);
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Add any extra information in key-value pairs. Examples:
+                      Technology - React.js, Medium - Video.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Replace Media Items Field with MediaSection */}
+              <MemoizedMediaSection
+                control={form.control}
+                initialMedia={[
+                  ...(projectData?.content?.imagesToContent || []).map(
+                    (image: any) => ({
+                      id: image.imageId,
+                      type: 'url' as const,
+                      value: image.image.url,
+                    }),
+                  ),
+                  ...(projectData?.content?.videosToContent || []).map(
+                    (video: any) => ({
+                      id: video.videoId,
+                      type: 'playbackId' as const,
+                      value: video.video.playbackId,
+                    }),
+                  ),
+                ]}
+                images={images}
+                videos={videos}
               />
             </div>
-
-            {/* Description Field */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="Enter project description"
-                      className="w-full rounded-md border border-gray-300 p-2"
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Provide a brief description of the project.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Tags Field */}
-            <FormField
-              control={form.control}
-              name="tags"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tags</FormLabel>
-                  <FormControl>
-                    <TagInput
-                      {...field}
-                      placeholder="e.g., design, marketing, video, software"
-                      tags={tags}
-                      className="sm:min-w-[450px]"
-                      setTags={(newTags) => {
-                        setTags(newTags);
-                        setValue('tags', newTags as [string, ...string[]]);
-                      }}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Add keywords that describe your project. This will help
-                    others find it. Example tags could include: industry, type
-                    of work, or technology used.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Featured Field */}
-            <FormField
-              control={form.control}
-              name="featured"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Featured</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center justify-start gap-2">
-                      <Checkbox
-                        checked={field.value ?? false}
-                        onCheckedChange={field.onChange}
-                      />
-                      <Label className="text-foreground">
-                        Mark as Featured
-                      </Label>
-                    </div>
-                  </FormControl>
-                  <FormDescription>
-                    Mark this project as a featured item. Featured projects are
-                    highlighted for better visibility.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Details Field */}
-            <FormField
-              control={form.control}
-              name="details"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Details</FormLabel>
-                  <FormControl>
-                    <DetailsInput
-                      details={details}
-                      setDetails={(newDetails) => {
-                        setDetails(newDetails);
-                        field.onChange(newDetails);
-                      }}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Add any extra information in key-value pairs. Examples:
-                    Technology - React.js, Medium - Video.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Replace Media Items Field with MediaSection */}
-            <MemoizedMediaSection
-              control={form.control}
-              initialMedia={[
-                ...(projectData?.content?.imagesToContent || []).map(
-                  (image: any) => ({
-                    id: image.imageId,
-                    type: 'url' as const,
-                    value: image.image.url,
-                  }),
-                ),
-                ...(projectData?.content?.videosToContent || []).map(
-                  (video: any) => ({
-                    id: video.videoId,
-                    type: 'playbackId' as const,
-                    value: video.video.playbackId,
-                  }),
-                ),
-              ]}
-              images={images}
-              videos={videos}
-            />
-
             {/* Submit Buttons */}
             <div className="mt-8 flex items-center justify-between space-x-4">
               {projectData && (
