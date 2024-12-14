@@ -2,25 +2,12 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { db } from '@/db';
-import { events } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-interface UpdateEventData {
-  id: string;
-  title: string;
-  description?: string;
-  startDate: Date;
-  endDate?: Date;
-  location?: string;
-  client?: string;
-  link?: string;
-  type: string;
-  status: string;
-  details?: Record<string, string>;
-}
+import { db } from '@/db';
+import { Event, events } from '@/db/schema';
 
-export async function updateEvent(data: UpdateEventData) {
+export async function updateEvent(data: Event) {
   try {
     await db
       .update(events)
@@ -32,7 +19,7 @@ export async function updateEvent(data: UpdateEventData) {
 
     revalidatePath(`/dashboard/${data.spaceId}/events`);
     revalidatePath(`/dashboard/${data.spaceId}/events/${data.id}`);
-    
+
     return { success: true };
   } catch (error) {
     console.error('Failed to update event:', error);

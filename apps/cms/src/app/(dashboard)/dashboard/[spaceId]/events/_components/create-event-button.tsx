@@ -8,12 +8,6 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { createEvent } from '@/lib/actions/create/create-event';
 
-type CreateEventResponse = {
-  success: boolean;
-  data?: { eventId: string };
-  error?: string;
-};
-
 export function CreateEventButton() {
   const params = useParams();
   const router = useRouter();
@@ -28,7 +22,7 @@ export function CreateEventButton() {
     try {
       const response = await createEvent({
         spaceId: spaceId,
-      }) as CreateEventResponse;
+      });
 
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Failed to create event');

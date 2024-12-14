@@ -5,20 +5,31 @@ import { revalidatePath } from 'next/cache';
 import { db } from '@/db';
 import { events } from '@/db/schema';
 
-export async function createEvent(formData: { spaceId: string }) {
+interface CreateEventResponse {
+  success: boolean;
+  data?: { eventId: string };
+  error?: string;
+}
+
+export async function createEvent(formData: {
+  spaceId: string;
+}): Promise<CreateEventResponse> {
   try {
-    const newEvent = await db.insert(events).values({
-      spaceId: formData.spaceId,
-      title: 'Untitled Event',
-      startDate: new Date(),
-      status: 'draft',
-    }).returning({ eventId: events.id });
+    const [result] = await db
+      .insert(events)
+      .values({
+        spaceId: formData.spaceId,
+        startDate: new Date(),
+        status: 'draft',
+        type: 'other',
+      })
+      .returning({ eventId: events.id });
 
     revalidatePath(`/dashboard/${formData.spaceId}/events`);
-    
-    return { 
-      success: true, 
-      data: { eventId: newEvent[0].eventId }
+
+    return {
+      success: true,
+      data: { eventId: result.eventId },
     };
   } catch (error) {
     console.error('Failed to create event:', error);

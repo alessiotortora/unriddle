@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
 import { Upload } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
@@ -33,10 +33,14 @@ interface FileUploaderProps {
     }[],
   ) => void;
   maxFiles?: number;
+  imagesOnly?: boolean;
 }
 
-function FileUploader({ onUploadComplete, maxFiles = 5 }: FileUploaderProps) {
-  const router = useRouter();
+function FileUploader({
+  onUploadComplete,
+  maxFiles = 5,
+  imagesOnly = false,
+}: FileUploaderProps) {
   const params = useParams();
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [loading, setLoading] = useState(false);
@@ -58,7 +62,7 @@ function FileUploader({ onUploadComplete, maxFiles = 5 }: FileUploaderProps) {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { 'image/*': [], 'video/*': [] },
+    accept: imagesOnly ? { 'image/*': [] } : { 'image/*': [], 'video/*': [] },
     maxFiles: maxFiles,
     multiple: maxFiles > 1,
     onDropRejected: () =>
@@ -111,12 +115,16 @@ function FileUploader({ onUploadComplete, maxFiles = 5 }: FileUploaderProps) {
               format: result.format,
             }));
 
-            await createImage(imagesToSave, params.spaceId as string);
+            const result = await createImage(
+              imagesToSave,
+              params.spaceId as string,
+            );
+
             uploadedItems.push(
-              ...results.map((r) => ({
+              ...result.images.map((r) => ({
                 id: r.id,
                 type: 'url' as const,
-                value: r.secure_url,
+                value: r.url,
               })),
             );
           }
@@ -151,7 +159,6 @@ function FileUploader({ onUploadComplete, maxFiles = 5 }: FileUploaderProps) {
     toast.promise(uploadPromise, {
       loading: 'Uploading...',
       success: (data: SonnerProps) => {
-        router.refresh();
         return `${data.message}`;
       },
       error: 'Failed to upload files. Please try again.',

@@ -21,9 +21,9 @@ import { cn } from '@/lib/utils';
 import FileUploader from './file-uploader';
 
 interface MediaSelectorProps {
-  id?: string; // Add this prop
-  images: Images[];
-  videos: Video[];
+  id?: string;
+  images?: Images[];
+  videos?: Video[];
   value: {
     id?: string;
     type: 'url' | 'playbackId';
@@ -42,6 +42,7 @@ interface MediaSelectorProps {
   title: string;
   side: 'top' | 'right' | 'bottom' | 'left';
   variant?: 'ghost' | 'secondary';
+  imagesOnly?: boolean;
 }
 
 const LoadingSpinner = () => (
@@ -60,6 +61,7 @@ export const MediaSelector = ({
   title,
   side,
   variant = 'secondary',
+  imagesOnly = false,
 }: MediaSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const hasSelection = value.length > 0;
@@ -143,6 +145,7 @@ export const MediaSelector = ({
 
   const handleUploadComplete = (
     items: {
+      id?: string;
       type: 'url' | 'playbackId';
       value: string | null;
       identifier?: string;
@@ -195,15 +198,20 @@ export const MediaSelector = ({
         </PopoverTrigger>
         <PopoverContent side={side} className="p-4">
           <Tabs defaultValue="images">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList
+              className={cn(
+                'grid w-full',
+                imagesOnly ? 'grid-cols-2' : 'grid-cols-3',
+              )}
+            >
               <TabsTrigger value="images">Images</TabsTrigger>
-              <TabsTrigger value="videos">Videos</TabsTrigger>
+              {!imagesOnly && <TabsTrigger value="videos">Videos</TabsTrigger>}
               <TabsTrigger value="upload">Upload New</TabsTrigger>
             </TabsList>
             <TabsContent value="images">
               <ScrollArea className="h-[400px]">
                 <div className="flex flex-wrap gap-2">
-                  {images.map((image) => (
+                  {images?.map((image) => (
                     <Suspense key={image.id} fallback={<LoadingSpinner />}>
                       <MediaThumbnail
                         id={image.id}
@@ -221,37 +229,40 @@ export const MediaSelector = ({
                 </div>
               </ScrollArea>
             </TabsContent>
-            <TabsContent value="videos">
-              <ScrollArea className="h-[400px]">
-                <div className="flex flex-wrap gap-2">
-                  {videos.map((video) => (
-                    <Suspense key={video.id} fallback={<LoadingSpinner />}>
-                      <MediaThumbnail
-                        id={video.id}
-                        type="playbackId"
-                        itemValue={video.playbackId || ''}
-                        thumbnailUrl={
-                          video.playbackId
-                            ? `https://image.mux.com/${video.playbackId}/thumbnail.webp`
-                            : ''
-                        }
-                        isSelected={value.some(
-                          (item) =>
-                            item.type === 'playbackId' &&
-                            item.value === video.playbackId,
-                        )}
-                        onToggle={toggleMediaItem}
-                        isPending={!video.playbackId}
-                      />
-                    </Suspense>
-                  ))}
-                </div>
-              </ScrollArea>
-            </TabsContent>
+            {!imagesOnly && (
+              <TabsContent value="videos">
+                <ScrollArea className="h-[400px]">
+                  <div className="flex flex-wrap gap-2">
+                    {videos?.map((video) => (
+                      <Suspense key={video.id} fallback={<LoadingSpinner />}>
+                        <MediaThumbnail
+                          id={video.id}
+                          type="playbackId"
+                          itemValue={video.playbackId || ''}
+                          thumbnailUrl={
+                            video.playbackId
+                              ? `https://image.mux.com/${video.playbackId}/thumbnail.webp`
+                              : ''
+                          }
+                          isSelected={value.some(
+                            (item) =>
+                              item.type === 'playbackId' &&
+                              item.value === video.playbackId,
+                          )}
+                          onToggle={toggleMediaItem}
+                          isPending={!video.playbackId}
+                        />
+                      </Suspense>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+            )}
             <TabsContent value="upload">
               <FileUploader
                 onUploadComplete={handleUploadComplete}
                 maxFiles={Math.min(maxSelection || 5, 5)}
+                imagesOnly={imagesOnly}
               />
             </TabsContent>
           </Tabs>

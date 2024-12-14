@@ -1,10 +1,15 @@
 'use client';
 
+import React from 'react';
+
+import { useParams, useRouter } from 'next/navigation';
+
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format } from 'date-fns';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import * as z from 'zod';
 
+import { CoverSection } from '@/components/media/cover-section';
 import { Button } from '@/components/ui/button';
 import { DateTimePicker } from '@/components/ui/data-time-picker';
 import {
@@ -25,20 +30,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Event } from '@/db/schema';
-import { toast } from 'sonner';
-import { useParams, useRouter } from 'next/navigation';
+import { Image as Images } from '@/db/schema';
+import { Event, eventStatusEnum, eventTypeEnum } from '@/db/schema';
 import { updateEvent } from '@/lib/actions/update/update-event';
 
 interface EventFormProps {
   eventData: Event | null;
+  images: Images[];
 }
 
 const eventFormSchema = z.object({
   title: z.string().max(256, {
     message: 'Title must be 256 characters or less.',
   }),
-  description: z.string(),
+  description: z.string().optional(),
   startDate: z.object({
     date: z.date(),
     hasTime: z.boolean(),
@@ -47,19 +52,29 @@ const eventFormSchema = z.object({
     date: z.date(),
     hasTime: z.boolean(),
   }),
-  location: z.string(),
-  client: z.string(),
+  location: z.string().optional(),
+  client: z.string().optional(),
   link: z.string().url({ message: 'Please enter a valid URL.' }).optional(),
-  type: z.string(),
-  status: z.string(),
-  coverImage: z.string(),
-  space: z.string(),
-  details: z.record(z.string(), z.string()),
+  type: z.enum(eventTypeEnum.enumValues),
+  status: z.enum(eventStatusEnum.enumValues),
+  details: z.record(z.string(), z.string()).optional(),
+  coverMedia: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        type: z.enum(['url']),
+        value: z.string().nullable(),
+      }),
+    )
+    .optional(),
+  coverImageId: z.string().nullable().optional(),
 });
+
+const MemoizedCoverSection = React.memo(CoverSection);
 
 type EventFormValues = z.infer<typeof eventFormSchema>;
 
-export function EventForm({ eventData }: EventFormProps) {
+export function EventForm({ eventData, images }: EventFormProps) {
   const params = useParams();
   const router = useRouter();
   const spaceId = params.spaceId as string;
@@ -69,13 +84,13 @@ export function EventForm({ eventData }: EventFormProps) {
     defaultValues: {
       title: eventData?.title || '',
       description: eventData?.description || '',
-      startDate: { 
-        date: eventData?.startDate ? new Date(eventData.startDate) : new Date(), 
-        hasTime: false 
+      startDate: {
+        date: eventData?.startDate ? new Date(eventData.startDate) : new Date(),
+        hasTime: false,
       },
-      endDate: { 
-        date: eventData?.endDate ? new Date(eventData.endDate) : new Date(), 
-        hasTime: false 
+      endDate: {
+        date: eventData?.endDate ? new Date(eventData.endDate) : new Date(),
+        hasTime: false,
       },
       location: eventData?.location || '',
       client: eventData?.client || '',
@@ -83,20 +98,41 @@ export function EventForm({ eventData }: EventFormProps) {
       type: eventData?.type || 'other',
       status: eventData?.status || 'draft',
       details: eventData?.details || {},
+      coverMedia: eventData?.coverImageId
+        ? [
+            {
+              id: eventData.coverImageId,
+              type: 'url',
+              value:
+                images?.find((img) => img.id === eventData.coverImageId)?.url ||
+                null,
+            },
+          ]
+        : [],
+      coverImageId: eventData?.coverImageId || null,
     },
   });
 
   async function onSubmit(data: EventFormValues, isDraft: boolean) {
     try {
       const status = isDraft ? 'draft' : 'scheduled';
-      
+
       const response = await updateEvent({
-        ...data,
         id: eventData?.id!,
-        spaceId,
-        status,
+        title: data.title,
+        description: data.description || null,
         startDate: data.startDate.date,
         endDate: data.endDate.date,
+        location: data.location || null,
+        client: data.client || null,
+        link: data.link || null,
+        type: data.type,
+        status: status as (typeof eventStatusEnum.enumValues)[number],
+        details: data.details || {},
+        coverImageId: data.coverImageId || null,
+        createdAt: eventData?.createdAt || new Date(),
+        updatedAt: new Date(),
+        spaceId,
       });
 
       if (!response.success) {
@@ -104,7 +140,7 @@ export function EventForm({ eventData }: EventFormProps) {
       }
 
       toast.success(isDraft ? 'Draft saved' : 'Event published');
-      router.refresh();
+      router.push(`/dashboard/${eventData?.spaceId}`);
     } catch (error) {
       toast.error('Failed to save event');
     }
@@ -116,6 +152,12 @@ export function EventForm({ eventData }: EventFormProps) {
         onSubmit={form.handleSubmit((data) => onSubmit(data, false))}
         className="space-y-8"
       >
+        <MemoizedCoverSection
+          control={form.control}
+          images={images}
+          setValue={form.setValue}
+          imagesOnly={true}
+        />
         <div className="grid grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -149,9 +191,11 @@ export function EventForm({ eventData }: EventFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="exhibition">Exhibition</SelectItem>
-                    <SelectItem value="workshop">Workshop</SelectItem>
-                    {/* Add more event types as needed */}
+                    {eventTypeEnum.enumValues.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -159,6 +203,24 @@ export function EventForm({ eventData }: EventFormProps) {
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Event description"
+                  {...field}
+                  value={field.value || ''}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div className="grid grid-cols-2 gap-6">
           <FormField
@@ -237,31 +299,6 @@ export function EventForm({ eventData }: EventFormProps) {
                 <FormControl>
                   <Input placeholder="https://example.com" {...field} />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="space"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Space</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a space" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="venue1">Venue 1</SelectItem>
-                    <SelectItem value="room1">Room 1</SelectItem>
-                    {/* Add more spaces as needed */}
-                  </SelectContent>
-                </Select>
                 <FormMessage />
               </FormItem>
             )}

@@ -10,7 +10,6 @@ export function useRealtime(
 ) {
   const supabase = createClient();
   const callbackRef = useRef(onEvent);
-  const router = useRouter();
 
   useEffect(() => {
     callbackRef.current = onEvent;
@@ -25,7 +24,6 @@ export function useRealtime(
         (payload) => {
           if (callbackRef.current) {
             callbackRef.current(payload);
-            router.refresh();
           }
         },
       )

@@ -32,7 +32,7 @@ export const eventStatusEnum = pgEnum('event_status', [
 
 export const events = pgTable('events', {
   id: uuid().primaryKey().notNull().defaultRandom(),
-  title: varchar({ length: 256 }).notNull(),
+  title: varchar({ length: 256 }),
   description: text(),
   startDate: timestamp().notNull(),
   endDate: timestamp(),

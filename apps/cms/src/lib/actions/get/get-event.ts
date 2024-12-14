@@ -6,6 +6,9 @@ export async function getEvent(eventId: string) {
   try {
     const event = await db.query.events.findFirst({
       where: (events, { eq }) => eq(events.id, eventId),
+      with: {
+        coverImage: true,
+      },
     });
 
     if (!event) {
@@ -14,7 +17,7 @@ export async function getEvent(eventId: string) {
 
     return event;
   } catch (error) {
-    console.error('Error fetching project:', error);
+    console.error('Error fetching event:', error);
     return null;
   }
 }

@@ -20,9 +20,10 @@ const LoadingSpinner = () => (
 
 interface CoverSectionProps {
   control: any;
-  images: Images[];
-  videos: Video[];
+  images?: Images[];
+  videos?: Video[];
   setValue: UseFormSetValue<any>;
+  imagesOnly?: boolean;
 }
 
 export function CoverSection({
@@ -30,6 +31,7 @@ export function CoverSection({
   images,
   videos,
   setValue,
+  imagesOnly = false,
 }: CoverSectionProps) {
   return (
     <div className="relative mb-4 mt-4 flex h-64 w-full items-center justify-center rounded-md">
@@ -100,6 +102,7 @@ export function CoverSection({
                       title={selectedCoverMedia ? 'Change Cover' : 'Add Cover'}
                       side={selectedCoverMedia ? 'left' : 'bottom'}
                       variant={selectedCoverMedia ? 'secondary' : 'ghost'}
+                      imagesOnly={imagesOnly}
                     />
                     {selectedCoverMedia && (
                       <Button

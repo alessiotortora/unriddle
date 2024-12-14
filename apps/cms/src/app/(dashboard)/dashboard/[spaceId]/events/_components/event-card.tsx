@@ -12,10 +12,10 @@ interface EventCardProps {
 }
 
 export function EventCard({ event }: EventCardProps) {
-  const spaceId = '1';
+  if (!event) return null;
 
   return (
-    <Link href={`/dashboard/${spaceId}/events/${event.id}`}>
+    <Link href={`/dashboard/${event.spaceId}/events/${event.id}`}>
       <Card className="hover:bg-muted/50 transition-colors">
         <CardContent className="p-6">
           <div className="flex items-start justify-between">
@@ -42,7 +42,7 @@ export function EventCard({ event }: EventCardProps) {
             <div className="relative h-48 w-full">
               <Image
                 src={`/api/images/${event.coverImageId}`}
-                alt={event.title}
+                alt={event?.title || 'Cover Image'}
                 fill
                 className="rounded-b-lg object-cover"
               />

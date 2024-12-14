@@ -1,11 +1,20 @@
 'use server';
 
 import { and, count, eq } from 'drizzle-orm';
+import { validate } from 'uuid';
 
 import { db } from '@/db';
 import { content, projects } from '@/db/schema';
 
 export async function getProjectsCount(spaceId: string) {
+  if (!validate(spaceId)) {
+    console.error('Invalid UUID format for spaceId:', spaceId);
+    return {
+      total: 0,
+      published: 0,
+    };
+  }
+
   try {
     const [{ count: totalCount }] = await db
       .select({ count: count() })

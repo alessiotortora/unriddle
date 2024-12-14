@@ -34,7 +34,12 @@ import {
 } from '@/components/ui/select';
 import { TagInput } from '@/components/ui/tag-input';
 import { Textarea } from '@/components/ui/textarea';
-import { Image as Images, Video } from '@/db/schema';
+import {
+  Image as ImageType,
+  ImagesToContent,
+  Video as VideoType,
+  VideosToContent,
+} from '@/db/schema';
 import { updateProject } from '@/lib/actions/update/update-project';
 import { isRecordOfString } from '@/lib/utils';
 
@@ -45,8 +50,8 @@ type ProjectFormValues = z.infer<typeof formSchema>;
 
 interface ProjectFormProps {
   projectData: ProjectWithRelations | null;
-  images: Images[];
-  videos: Video[];
+  images: ImageType[];
+  videos: VideoType[];
 }
 
 const formSchema = z.object({
@@ -60,7 +65,7 @@ const formSchema = z.object({
   media: z
     .array(
       z.object({
-        id: z.string().optional(),
+        id: z.string(),
         type: z.enum(['url', 'playbackId']),
         value: z.string(),
       }),
@@ -101,7 +106,6 @@ export default function ProjectForm({
   const formattedUpdatedAt = projectData?.updatedAt
     ? format(new Date(projectData.updatedAt), 'MM/dd/yyyy') // Using `MM/dd/yyyy` format
     : 'N/A';
-
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -117,17 +121,17 @@ export default function ProjectForm({
       media: projectData?.content
         ? [
             ...(projectData.content.imagesToContent || []).map(
-              (image: any) => ({
-                id: image.imageId,
+              (image: ImagesToContent & { image: ImageType }) => ({
+                id: image.image.id,
                 type: 'url' as const,
-                value: image.url,
+                value: image.image.url || '',
               }),
             ),
             ...(projectData.content.videosToContent || []).map(
-              (video: any) => ({
-                id: video.videoId,
+              (video: VideosToContent & { video: VideoType }) => ({
+                id: video.video.id,
                 type: 'playbackId' as const,
-                value: video.playbackId,
+                value: video.video.playbackId || '',
               }),
             ),
           ]
@@ -205,7 +209,7 @@ export default function ProjectForm({
       toast.promise(promise, {
         loading: status === 'published' ? 'Publishing...' : 'Saving...',
         success: (status) => {
-          router.push(`/dashboard/projects`);
+          router.push(`/dashboard/${projectData.content.spaceId}`);
           return status === 'published'
             ? 'Project published successfully!'
             : 'Project saved successfully!';
@@ -393,15 +397,15 @@ export default function ProjectForm({
                 control={form.control}
                 initialMedia={[
                   ...(projectData?.content?.imagesToContent || []).map(
-                    (image: any) => ({
-                      id: image.imageId,
+                    (image: ImagesToContent & { image: ImageType }) => ({
+                      id: image.image.id,
                       type: 'url' as const,
                       value: image.image.url,
                     }),
                   ),
                   ...(projectData?.content?.videosToContent || []).map(
-                    (video: any) => ({
-                      id: video.videoId,
+                    (video: VideosToContent & { video: VideoType }) => ({
+                      id: video.video.id,
                       type: 'playbackId' as const,
                       value: video.video.playbackId,
                     }),

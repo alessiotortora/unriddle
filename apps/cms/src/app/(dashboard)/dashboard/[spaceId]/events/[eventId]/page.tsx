@@ -4,18 +4,21 @@ import { getMedia } from '@/lib/actions/get/get-media';
 
 import { EventForm } from './_components/event-form';
 
-export default async function ProjectPage({
+export default async function EventPage({
   params,
 }: {
   params: Promise<{ spaceId: string; eventId: string }>;
 }) {
   const eventId = (await params).eventId;
   const spaceId = (await params).spaceId;
-  const event = await getEvent(eventId);
 
+  const [event, mediaItems] = await Promise.all([
+    getEvent(eventId),
+    getMedia(spaceId),
+  ]);
   return (
     <PageContainer scrollable={true}>
-      <EventForm eventData={event} />
+      <EventForm eventData={event} images={mediaItems.images} />
     </PageContainer>
   );
 }
