@@ -42,22 +42,20 @@ export function DashboardCard({ metrics }: DashboardCardProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {dashboardMetrics.map((metric) => (
-        <Link href={metric.href} key={metric.title}>
-          <Card className="transition-shadow hover:shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {metric.title}
-              </CardTitle>
-              {metric.icon}
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metric.value}</div>
-              <p className="text-muted-foreground text-xs">
-                {metric.description}
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
+        <Card key={metric.title} className="transition-shadow hover:shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {metric.title}
+            </CardTitle>
+            {metric.icon}
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metric.value}</div>
+            <p className="text-muted-foreground text-xs">
+              {metric.description}
+            </p>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

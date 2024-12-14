@@ -4,12 +4,10 @@ import * as React from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  CircleUserRound,
-  Contact2,
   Github,
   Globe,
-  Globe2,
   Instagram,
+  Key,
   Link,
   LinkIcon,
   Linkedin,
@@ -51,6 +49,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Textarea } from '@/components/ui/textarea';
 import { useUser } from '@/hooks/use-user';
+import { generateApiKey } from '@/lib/actions/generate-api-key';
 import { updateUser } from '@/lib/actions/update/update-user';
 
 import { BaseDialog } from './base-dialog';
@@ -76,6 +75,7 @@ const formSchema = z.object({
   firstName: z.string().nullable(),
   lastName: z.string().nullable(),
   bio: z.string().nullable(),
+  apiKey: z.string().nullable(),
   location: z.string().nullable(),
   socialLinks: z
     .object({
@@ -94,7 +94,8 @@ type FormValues = z.infer<typeof formSchema>;
 const data = {
   nav: [
     { name: 'My account', icon: UserRound },
-    { name: 'My connections', icon: LinkIcon },
+    { name: 'My social links', icon: LinkIcon },
+    { name: 'My API key', icon: Key },
   ],
 };
 
@@ -109,6 +110,7 @@ interface SettingsDialogProps {
     bio: string | null;
     location: string | null;
     role: 'guest' | 'user' | 'admin';
+    apiKey: string | null;
     createdAt: Date;
     updatedAt: Date;
     socialLinks: Array<{
@@ -298,6 +300,107 @@ function SocialLinksSection({
   );
 }
 
+function ApiSection({
+  user,
+  form,
+}: {
+  user: SettingsDialogProps['user'];
+  form: ReturnType<typeof useForm<FormValues>>;
+}) {
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [showApiKey, setShowApiKey] = React.useState(false);
+
+  const generateNewApiKey = async () => {
+    setIsGenerating(true);
+    try {
+      const response = await generateApiKey(user.id);
+
+      if (!response.success || !response.apiKey) {
+        throw new Error(response.error || 'Failed to generate API key');
+      }
+
+      // Update form value
+      form.setValue('apiKey', response.apiKey);
+
+      // Show the API key after generation
+      setShowApiKey(true);
+    } catch (error) {
+      toast.error('Failed to generate API key');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <h3 className="text-lg font-medium">API Key</h3>
+        <p className="text-muted-foreground text-sm">
+          Your API key provides access to the API. Keep it secure and never
+          share it publicly.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <FormField
+          control={form.control}
+          name="apiKey"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center gap-4">
+                <FormControl>
+                  <Input
+                    {...field}
+                    type={showApiKey ? 'text' : 'password'}
+                    value={field.value || ''}
+                    readOnly
+                    className="font-mono"
+                  />
+                </FormControl>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  disabled={!field.value}
+                >
+                  {showApiKey ? 'Hide' : 'Show'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    if (field.value) {
+                      navigator.clipboard.writeText(field.value);
+                      toast.success('API key copied to clipboard');
+                    }
+                  }}
+                  disabled={!field.value}
+                >
+                  Copy
+                </Button>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <Button
+          type="button"
+          variant="default"
+          onClick={generateNewApiKey}
+          disabled={isGenerating}
+        >
+          {isGenerating ? 'Generating...' : 'Generate New API Key'}
+        </Button>
+
+        <p className="text-muted-foreground text-sm">
+          Generating a new API key will invalidate your existing key. Make sure
+          to update any applications using the old key.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function SettingsDialog({ isOpen, onClose, user }: SettingsDialogProps) {
   const [activeSection, setActiveSection] = React.useState('My account');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -313,6 +416,7 @@ export function SettingsDialog({ isOpen, onClose, user }: SettingsDialogProps) {
       firstName: user.firstName,
       lastName: user.lastName,
       bio: user.bio,
+      apiKey: user.apiKey,
       location: user.location,
       socialLinks: socialLinksObject, // Use the transformed object
     },
@@ -328,6 +432,7 @@ export function SettingsDialog({ isOpen, onClose, user }: SettingsDialogProps) {
         firstName: values.firstName ?? null,
         lastName: values.lastName ?? null,
         bio: values.bio ?? null,
+        apiKey: values.apiKey ?? null,
         location: values.location ?? null,
         socialLinks: values.socialLinks
           ? {
@@ -366,8 +471,10 @@ export function SettingsDialog({ isOpen, onClose, user }: SettingsDialogProps) {
     switch (activeSection) {
       case 'My account':
         return <ProfileSection form={form} />;
-      case 'My connections':
+      case 'My social links':
         return <SocialLinksSection form={form} />;
+      case 'My API key':
+        return <ApiSection user={user} form={form} />; // Pass form prop here
       default:
         return null;
     }

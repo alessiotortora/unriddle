@@ -12,6 +12,7 @@ export async function updateUser(
     lastName: string | null;
     bio: string | null;
     location: string | null;
+    apiKey: string | null;
     socialLinks: {
       twitter: string | null;
       github: string | null;
@@ -23,32 +24,18 @@ export async function updateUser(
   },
 ) {
   try {
-    await db.transaction(async (tx) => {
-      // Update user
-      await tx
-        .update(users)
-        .set({
-          firstName: data.firstName,
-          lastName: data.lastName,
-          bio: data.bio,
-          location: data.location,
-        })
-        .where(eq(users.id, userId));
-
-      // Upsert social links
-      if (data.socialLinks) {
-        await tx
-          .insert(socialLinks)
-          .values({
-            userId,
-            ...data.socialLinks,
-          })
-          .onConflictDoUpdate({
-            target: socialLinks.userId,
-            set: data.socialLinks,
-          });
-      }
-    });
+    await db
+      .update(users)
+      .set({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        bio: data.bio,
+        location: data.location,
+        apiKey: data.apiKey,
+        socialLinks: data.socialLinks ? [data.socialLinks] : null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
 
     return { success: true };
   } catch (error) {

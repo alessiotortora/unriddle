@@ -16,6 +16,7 @@ export const users = pgTable('users', {
   location: varchar({ length: 256 }),
   bio: text(),
   email: varchar({ length: 256 }).unique(),
+  apiKey: varchar({ length: 256 }).unique(),
   createdAt,
   updatedAt,
 });

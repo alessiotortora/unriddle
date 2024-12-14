@@ -59,3 +59,6 @@ export const eventsRelations = relations(events, ({ one }) => ({
     references: [images.id],
   }),
 }));
+
+export type Event = typeof events.$inferSelect;
+export type NewEvent = typeof events.$inferInsert;

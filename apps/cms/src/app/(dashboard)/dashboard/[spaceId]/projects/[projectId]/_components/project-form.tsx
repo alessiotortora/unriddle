@@ -205,7 +205,7 @@ export default function ProjectForm({
       toast.promise(promise, {
         loading: status === 'published' ? 'Publishing...' : 'Saving...',
         success: (status) => {
-          router.push(`/dashboard`);
+          router.push(`/dashboard/projects`);
           return status === 'published'
             ? 'Project published successfully!'
             : 'Project saved successfully!';
