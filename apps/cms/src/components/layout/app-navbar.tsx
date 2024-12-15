@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useUser } from '@/hooks/use-user';
 
 import { Button } from '../ui/button';
-import { ModeToggle } from '../ui/theme-toggle';
+import { ThemeToggle } from '../ui/theme-toggle';
 
 export function AppNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -41,7 +41,7 @@ export function AppNavbar() {
 
         {/* Navigation Controls */}
         <div className="flex items-center space-x-4">
-          <ModeToggle />
+          <ThemeToggle />
 
           {user ? (
             <Link href="/dashboard">

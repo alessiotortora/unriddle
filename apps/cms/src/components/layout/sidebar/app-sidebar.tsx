@@ -33,16 +33,8 @@ import { useDialog } from '@/hooks/use-dialog';
 import { useUser } from '@/hooks/use-user';
 
 import { NavProjects } from './nav-projects';
-import { NavSecondary } from './nav-secondary';
 import { NavUser } from './nav-user';
 
-const navSecondary = [
-  {
-    title: 'Settings',
-    url: '#',
-    icon: SettingsIcon,
-  },
-];
 const settingsItem = {
   title: 'Settings',
   icon: Settings,
@@ -131,7 +123,6 @@ export function AppSidebar({ projects }: AppSidebarProps) {
             icon: File,
           }))}
         />
-        <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

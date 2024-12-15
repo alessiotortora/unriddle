@@ -31,24 +31,7 @@ export function EventCard({ event }: EventCardProps) {
               {event.status}
             </Badge>
           </div>
-          {event.description && (
-            <p className="text-muted-foreground mt-2 line-clamp-2 text-sm">
-              {event.description}
-            </p>
-          )}
         </CardContent>
-        {event.coverImageId && (
-          <CardFooter className="p-0">
-            <div className="relative h-48 w-full">
-              <Image
-                src={`/api/images/${event.coverImageId}`}
-                alt={event?.title || 'Cover Image'}
-                fill
-                className="rounded-b-lg object-cover"
-              />
-            </div>
-          </CardFooter>
-        )}
       </Card>
     </Link>
   );

@@ -100,7 +100,7 @@ export function CoverSection({
                       }}
                       maxSelection={1}
                       title={selectedCoverMedia ? 'Change Cover' : 'Add Cover'}
-                      side={selectedCoverMedia ? 'left' : 'bottom'}
+                      side={selectedCoverMedia ? 'bottom' : 'bottom'}
                       variant={selectedCoverMedia ? 'secondary' : 'ghost'}
                       imagesOnly={imagesOnly}
                     />

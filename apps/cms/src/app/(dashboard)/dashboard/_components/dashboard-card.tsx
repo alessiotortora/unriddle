@@ -16,8 +16,7 @@ interface DashboardCardProps {
   metrics: {
     totalProjects: number;
     publishedProjects: number;
-    // totalEvents: number;
-    // upcomingEvents: number;
+    upcomingEvents: number;
   };
 }
 
@@ -36,6 +35,13 @@ export function DashboardCard({ metrics }: DashboardCardProps) {
       icon: <Globe className="text-muted-foreground h-4 w-4" />,
       href: '/dashboard/projects?status=published',
       description: 'Projects visible on your portfolio',
+    },
+    {
+      title: 'Upcoming Events',
+      value: metrics.upcomingEvents,
+      icon: <Calendar className="text-muted-foreground h-4 w-4" />,
+      href: '/dashboard/events',
+      description: 'Your upcoming events',
     },
   ];
 

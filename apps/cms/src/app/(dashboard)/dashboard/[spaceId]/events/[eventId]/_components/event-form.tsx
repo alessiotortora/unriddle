@@ -39,36 +39,75 @@ interface EventFormProps {
   images: Images[];
 }
 
-const eventFormSchema = z.object({
-  title: z.string().max(256, {
-    message: 'Title must be 256 characters or less.',
-  }),
-  description: z.string().optional(),
-  startDate: z.object({
-    date: z.date(),
-    hasTime: z.boolean(),
-  }),
-  endDate: z.object({
-    date: z.date(),
-    hasTime: z.boolean(),
-  }),
-  location: z.string().optional(),
-  client: z.string().optional(),
-  link: z.string().url({ message: 'Please enter a valid URL.' }).optional(),
-  type: z.enum(eventTypeEnum.enumValues),
-  status: z.enum(eventStatusEnum.enumValues),
-  details: z.record(z.string(), z.string()).optional(),
-  coverMedia: z
-    .array(
-      z.object({
-        id: z.string().optional(),
-        type: z.enum(['url']),
-        value: z.string().nullable(),
-      }),
-    )
-    .optional(),
-  coverImageId: z.string().nullable().optional(),
-});
+const eventFormSchema = z
+  .object({
+    title: z.string().max(256, {
+      message: 'Title must be 256 characters or less.',
+    }),
+    description: z.string().optional(),
+    startDate: z.object({
+      date: z.date(),
+      hasTime: z.boolean(),
+    }),
+    endDate: z.object({
+      date: z.date(),
+      hasTime: z.boolean(),
+    }),
+    location: z.string().optional(),
+    client: z.string().optional(),
+    link: z
+      .string()
+      .transform((url) => {
+        if (!url) return '';
+        if (url.startsWith('www.')) {
+          return `https://${url}`;
+        }
+        if (url.startsWith('http://')) {
+          return url.replace('http://', 'https://');
+        }
+        if (!url.startsWith('http')) {
+          return `https://${url}`;
+        }
+        return url;
+      })
+      .refine(
+        (url) => {
+          if (!url) return true;
+          try {
+            new URL(url);
+            return true;
+          } catch {
+            return false;
+          }
+        },
+        { message: 'Please enter a valid URL.' },
+      )
+      .optional(),
+    type: z.enum(eventTypeEnum.enumValues),
+    status: z.enum(eventStatusEnum.enumValues),
+    details: z.record(z.string(), z.string()).optional(),
+    coverMedia: z
+      .array(
+        z.object({
+          id: z.string().optional(),
+          type: z.enum(['url']),
+          value: z.string().nullable(),
+        }),
+      )
+      .optional(),
+    coverImageId: z.string().nullable().optional(),
+  })
+  .refine(
+    (data) => {
+      const startDateTime = data.startDate.date.getTime();
+      const endDateTime = data.endDate.date.getTime();
+      return endDateTime > startDateTime;
+    },
+    {
+      message: 'End date and time must be after start date and time',
+      path: ['endDate'], // This will show the error on the endDate field
+    },
+  );
 
 const MemoizedCoverSection = React.memo(CoverSection);
 
@@ -231,9 +270,10 @@ export function EventForm({ eventData, images }: EventFormProps) {
                 <FormLabel>Start Date & Time</FormLabel>
                 <DateTimePicker
                   date={field.value.date}
-                  setDate={(newDate) =>
-                    field.onChange({ ...field.value, date: newDate })
-                  }
+                  setDate={(newDate) => {
+                    field.onChange({ ...field.value, date: newDate });
+                    form.trigger('endDate');
+                  }}
                 />
                 <FormMessage />
               </FormItem>
@@ -247,9 +287,10 @@ export function EventForm({ eventData, images }: EventFormProps) {
                 <FormLabel>End Date & Time</FormLabel>
                 <DateTimePicker
                   date={field.value.date}
-                  setDate={(newDate) =>
-                    field.onChange({ ...field.value, date: newDate })
-                  }
+                  setDate={(newDate) => {
+                    field.onChange({ ...field.value, date: newDate });
+                    form.trigger('endDate');
+                  }}
                 />
                 <FormMessage />
               </FormItem>

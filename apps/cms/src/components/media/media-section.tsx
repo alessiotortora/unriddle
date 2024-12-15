@@ -52,7 +52,7 @@ export function MediaSection({
             <MediaSelector
               id="media"
               title="Select Media"
-              side="bottom"
+              side="top"
               images={images}
               videos={videos}
               value={generalMediaValue}

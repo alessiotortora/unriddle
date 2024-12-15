@@ -23,14 +23,19 @@ async function EventsList() {
 export default function EventsPage() {
   return (
     <PageContainer scrollable>
-      <div className="flex items-center justify-between">
-        <Heading title="Events" description="Manage and organize your events" />
-        <CreateEventButton />
-      </div>
+      <div className="flex h-full flex-col space-y-8">
+        <div className="flex items-center justify-between">
+          <Heading
+            title="Events"
+            description="Manage and organize your events"
+          />
+          <CreateEventButton />
+        </div>
 
-      <Suspense fallback={<EventsGridSkeleton />}>
-        <EventsList />
-      </Suspense>
+        <Suspense fallback={<EventsGridSkeleton />}>
+          <EventsList />
+        </Suspense>
+      </div>
     </PageContainer>
   );
 }

@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 
+import { useRouter } from 'next/navigation';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Github,
@@ -56,6 +58,7 @@ import { BaseDialog } from './base-dialog';
 
 const urlSchema = z
   .string()
+  .url({ message: 'Please enter a valid URL.' })
   .nullable()
   .refine(
     (url) => {
@@ -405,7 +408,7 @@ export function SettingsDialog({ isOpen, onClose, user }: SettingsDialogProps) {
   const [activeSection, setActiveSection] = React.useState('My account');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const setUser = useUser((state) => state.setUser);
-
+  const router = useRouter();
   // Transform socialLinks array to object
   const socialLinksObject = user.socialLinks?.[0] ?? null;
 
@@ -460,6 +463,7 @@ export function SettingsDialog({ isOpen, onClose, user }: SettingsDialogProps) {
 
       toast.success('Settings saved successfully');
       form.reset(values); // Reset form state to remove dirty status
+      router.refresh();
     } catch (error) {
       toast.error('Failed to save settings');
     } finally {

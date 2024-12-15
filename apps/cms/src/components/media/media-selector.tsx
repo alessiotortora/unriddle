@@ -4,9 +4,16 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 
 import Image from 'next/image';
 
-import { ImageIcon, Loader2 } from 'lucide-react';
+import { Check, ImageIcon, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 import {
   Popover,
   PopoverContent,
@@ -18,6 +25,7 @@ import { Image as Images, Video } from '@/db/schema';
 import { useRealtime } from '@/hooks/use-realtime';
 import { cn } from '@/lib/utils';
 
+import { useSidebar } from '../ui/sidebar';
 import FileUploader from './file-uploader';
 
 interface MediaSelectorProps {
@@ -63,8 +71,10 @@ export const MediaSelector = ({
   variant = 'secondary',
   imagesOnly = false,
 }: MediaSelectorProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('images');
   const hasSelection = value.length > 0;
+  const { isMobile } = useSidebar();
 
   const valueRef = useRef(value);
 
@@ -110,6 +120,12 @@ export const MediaSelector = ({
       value: string;
       identifier?: string;
     }) => {
+      if (mediaItem.type === 'url') {
+        setActiveTab('images');
+      } else if (mediaItem.type === 'playbackId') {
+        setActiveTab('videos');
+      }
+
       const exists = value.some(
         (item) =>
           item.type === mediaItem.type && item.value === mediaItem.value,
@@ -135,7 +151,7 @@ export const MediaSelector = ({
       }
 
       if (maxSelection === 1 && newMediaItems.length === 1) {
-        setIsPopoverOpen(false);
+        setIsOpen(false);
       }
 
       onChange(newMediaItems);
@@ -174,110 +190,144 @@ export const MediaSelector = ({
       onChange(newItems.slice(0, maxSelection));
     }
 
-    setIsPopoverOpen(false);
+    setIsOpen(false);
   };
+
+  const MediaContent = () => (
+    <Tabs defaultValue="images" value={activeTab} onValueChange={setActiveTab}>
+      <TabsList
+        className={cn(
+          'grid w-full',
+          imagesOnly ? 'grid-cols-2' : 'grid-cols-3',
+        )}
+      >
+        <TabsTrigger value="images">Images</TabsTrigger>
+        {!imagesOnly && <TabsTrigger value="videos">Videos</TabsTrigger>}
+        <TabsTrigger value="upload">Upload New</TabsTrigger>
+      </TabsList>
+      <TabsContent value="images">
+        <ScrollArea className={cn('h-[300px]', isMobile && 'h-[60vh]')}>
+          <div className="mx-auto mt-5 flex flex-wrap justify-center gap-1 p-1 sm:gap-2 sm:p-0">
+            {images?.map((image) => (
+              <Suspense key={image.id} fallback={<LoadingSpinner />}>
+                <MediaThumbnail
+                  id={image.id}
+                  type="url"
+                  itemValue={image.url}
+                  thumbnailUrl={image.url}
+                  isSelected={value.some(
+                    (item) => item.type === 'url' && item.value === image.url,
+                  )}
+                  onToggle={toggleMediaItem}
+                />
+              </Suspense>
+            ))}
+          </div>
+        </ScrollArea>
+      </TabsContent>
+      {!imagesOnly && (
+        <TabsContent value="videos">
+          <ScrollArea className={cn('h-[300px]', isMobile && 'h-[60vh]')}>
+            <div className="mx-auto mt-5 flex flex-wrap justify-center gap-1 p-1 sm:gap-2 sm:p-0">
+              {videos?.map((video) => (
+                <Suspense key={video.id} fallback={<LoadingSpinner />}>
+                  <MediaThumbnail
+                    id={video.id}
+                    type="playbackId"
+                    itemValue={video.playbackId || ''}
+                    thumbnailUrl={
+                      video.playbackId
+                        ? `https://image.mux.com/${video.playbackId}/thumbnail.webp`
+                        : ''
+                    }
+                    isSelected={value.some(
+                      (item) =>
+                        item.type === 'playbackId' &&
+                        item.value === video.playbackId,
+                    )}
+                    onToggle={toggleMediaItem}
+                    isPending={!video.playbackId}
+                  />
+                </Suspense>
+              ))}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+      )}
+      <TabsContent value="upload">
+        <div className={cn('mt-5 h-[300px]', isMobile && 'mt-5 h-[60vh]')}>
+          <FileUploader
+            onUploadComplete={handleUploadComplete}
+            maxFiles={Math.min(maxSelection || 5, 5)}
+            imagesOnly={imagesOnly}
+          />
+        </div>
+      </TabsContent>
+    </Tabs>
+  );
 
   return (
     <div>
-      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-        <PopoverTrigger
-          asChild
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-        >
-          <Button
-            variant={variant}
-            size="sm"
-            className={cn(
-              'gap-1',
-              variant === 'ghost' ? 'text-muted-foreground' : '',
-            )}
-          >
-            {!hasSelection && <ImageIcon />}
-            {title} {maxSelection > 1 && `${value.length}/${maxSelection}`}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent side={side} className="p-4">
-          <Tabs defaultValue="images">
-            <TabsList
+      {isMobile ? (
+        <Drawer open={isOpen} onOpenChange={setIsOpen}>
+          <DrawerTrigger asChild>
+            <Button
+              variant={variant}
+              size="sm"
               className={cn(
-                'grid w-full',
-                imagesOnly ? 'grid-cols-2' : 'grid-cols-3',
+                'gap-1',
+                variant === 'ghost' ? 'text-muted-foreground' : '',
               )}
             >
-              <TabsTrigger value="images">Images</TabsTrigger>
-              {!imagesOnly && <TabsTrigger value="videos">Videos</TabsTrigger>}
-              <TabsTrigger value="upload">Upload New</TabsTrigger>
-            </TabsList>
-            <TabsContent value="images">
-              <ScrollArea className="h-[400px]">
-                <div className="flex flex-wrap gap-2">
-                  {images?.map((image) => (
-                    <Suspense key={image.id} fallback={<LoadingSpinner />}>
-                      <MediaThumbnail
-                        id={image.id}
-                        type="url"
-                        itemValue={image.url}
-                        thumbnailUrl={image.url}
-                        isSelected={value.some(
-                          (item) =>
-                            item.type === 'url' && item.value === image.url,
-                        )}
-                        onToggle={toggleMediaItem}
-                      />
-                    </Suspense>
-                  ))}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            {!imagesOnly && (
-              <TabsContent value="videos">
-                <ScrollArea className="h-[400px]">
-                  <div className="flex flex-wrap gap-2">
-                    {videos?.map((video) => (
-                      <Suspense key={video.id} fallback={<LoadingSpinner />}>
-                        <MediaThumbnail
-                          id={video.id}
-                          type="playbackId"
-                          itemValue={video.playbackId || ''}
-                          thumbnailUrl={
-                            video.playbackId
-                              ? `https://image.mux.com/${video.playbackId}/thumbnail.webp`
-                              : ''
-                          }
-                          isSelected={value.some(
-                            (item) =>
-                              item.type === 'playbackId' &&
-                              item.value === video.playbackId,
-                          )}
-                          onToggle={toggleMediaItem}
-                          isPending={!video.playbackId}
-                        />
-                      </Suspense>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </TabsContent>
-            )}
-            <TabsContent value="upload">
-              <FileUploader
-                onUploadComplete={handleUploadComplete}
-                maxFiles={Math.min(maxSelection || 5, 5)}
-                imagesOnly={imagesOnly}
-              />
-            </TabsContent>
-          </Tabs>
-        </PopoverContent>
-      </Popover>
+              {!hasSelection && <ImageIcon />}
+              {title} {maxSelection > 1 && `${value.length}/${maxSelection}`}
+            </Button>
+          </DrawerTrigger>
+          <DrawerTitle className="sr-only" />
+          <DrawerDescription className="sr-only" />
+          <DrawerContent>
+            <div className="mx-auto p-4">
+              <MediaContent />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant={variant}
+              size="sm"
+              className={cn(
+                'gap-1',
+                variant === 'ghost' ? 'text-muted-foreground' : '',
+              )}
+            >
+              {!hasSelection && <ImageIcon />}
+              {title} {maxSelection > 1 && `${value.length}/${maxSelection}`}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            side={side}
+            className="w-screen max-w-3xl p-4 md:w-[80vw]"
+            align="center"
+          >
+            <div className="w-full">
+              <MediaContent />
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
+
       {maxSelection > 1 && value.length > 0 && (
         <div className="mt-4">
           <p>Selected Media Items:</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
             {value.map((item, index) => (
               <Suspense key={index} fallback={<LoadingSpinner />}>
                 {!item.value || (item.type === 'playbackId' && !item.value) ? (
                   <LoadingSpinner />
                 ) : (
-                  <div className="relative h-16 w-32">
+                  <div className="relative aspect-video w-full">
                     <Image
                       src={
                         item.type === 'url'
@@ -285,13 +335,13 @@ export const MediaSelector = ({
                           : `https://image.mux.com/${item.value}/thumbnail.webp`
                       }
                       fill
-                      sizes="(max-width: 768px) 128px, 128px"
+                      sizes="(max-width: 768px) 50vw, 33vw"
                       alt={
                         item.type === 'url'
                           ? 'Selected Image'
                           : 'Selected Video'
                       }
-                      className="rounded-md"
+                      className="rounded-md object-cover"
                     />
                   </div>
                 )}
@@ -333,17 +383,34 @@ const MediaThumbnail = ({
   return (
     <div
       onClick={() => onToggle({ type, value: itemValue, id: id })}
-      className={`relative h-16 w-32 cursor-pointer ${
-        isSelected ? 'ring-2 ring-blue-500' : ''
-      }`}
+      className={cn(
+        'group relative aspect-video cursor-pointer overflow-hidden rounded-md',
+        'w-[calc(50%-0.5rem)] min-w-[100px] max-w-[200px]',
+        'sm:w-[calc(33%-0.5rem)]',
+        'md:w-[calc(25%-0.5rem)]',
+      )}
     >
       <Image
         src={thumbnailUrl}
         fill
-        sizes="(max-width: 768px) 128px, 128px"
+        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
         alt="thumbnail"
-        className="rounded-md"
+        className={cn('object-cover', isSelected && 'brightness-95')}
       />
+      <div
+        className={cn(
+          'absolute inset-0 bg-black/10 transition-opacity',
+          isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+        )}
+      />
+      <div
+        className={cn(
+          'bg-primary absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full shadow-md transition-transform',
+          isSelected ? 'scale-100' : 'scale-0 group-hover:scale-100',
+        )}
+      >
+        <Check className="text-primary-foreground h-3.5 w-3.5" />
+      </div>
     </div>
   );
 };

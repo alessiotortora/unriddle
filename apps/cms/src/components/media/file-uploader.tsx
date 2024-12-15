@@ -170,7 +170,7 @@ function FileUploader({
   return (
     <div className="flex min-h-full flex-col items-end">
       <div
-        className={`flex h-36 w-full cursor-pointer items-center justify-center border border-dashed p-20 outline-none ${loading ? 'opacity-50' : ''}`}
+        className={`flex h-full w-full cursor-pointer items-center justify-center border border-dashed p-20 outline-none ${loading ? 'opacity-50' : ''}`}
       >
         <div {...getRootProps()} className="text-center">
           <input {...getInputProps()} />
