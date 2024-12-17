@@ -19,7 +19,7 @@ async function EventsList() {
     </EventsGrid>
   );
 }
-
+ 
 export default function EventsPage() {
   return (
     <PageContainer scrollable>

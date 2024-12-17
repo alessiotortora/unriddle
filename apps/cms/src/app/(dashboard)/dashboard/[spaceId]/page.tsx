@@ -28,7 +28,6 @@ export default async function SpaceDashboardPage({
           title="Dashboard"
           description="Overview of your portfolio content"
         />
-
         <section aria-label="Dashboard Metrics">
           <DashboardCard metrics={metrics} />
         </section>

@@ -7,8 +7,8 @@ import { db } from '@/db';
 import { events } from '@/db/schema';
 
 export async function getEventsCount(spaceId: string) {
-  if (!validate(spaceId)) {
-    console.error('Invalid UUID format for spaceId:', spaceId);
+  if (!spaceId || !validate(spaceId)) {
+    console.error('Invalid or missing spaceId:', spaceId);
     return {
       total: 0,
       upcoming: 0,
@@ -16,25 +16,32 @@ export async function getEventsCount(spaceId: string) {
   }
 
   try {
-    const [{ count: totalCount }] = await db
-      .select({ count: count() })
+    // Get total count
+    const [totalResult] = await db
+      .select({
+        value: count(events.id),
+      })
       .from(events)
       .where(eq(events.spaceId, spaceId));
 
-    const [{ count: upcomingCount }] = await db
-      .select({ count: count() })
+    // Get upcoming count
+    const now = new Date();
+    const [upcomingResult] = await db
+      .select({
+        value: count(events.id),
+      })
       .from(events)
       .where(
         and(
           eq(events.spaceId, spaceId),
           eq(events.status, 'scheduled'),
-          gt(events.startDate, new Date()),
+          gt(events.startDate, now),
         ),
       );
 
     return {
-      total: totalCount,
-      upcoming: upcomingCount,
+      total: totalResult?.value ?? 0,
+      upcoming: upcomingResult?.value ?? 0,
     };
   } catch (error) {
     console.error('Error fetching event counts:', error);

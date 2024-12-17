@@ -1,10 +1,9 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { format } from 'date-fns';
 
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Event } from '@/db/schema';
 
 interface EventCardProps {
@@ -16,8 +15,8 @@ export function EventCard({ event }: EventCardProps) {
 
   return (
     <Link href={`/dashboard/${event.spaceId}/events/${event.id}`}>
-      <Card className="hover:bg-muted/50 transition-colors">
-        <CardContent className="p-6">
+      <Card className="group relative overflow-hidden transition-colors hover:shadow-md">
+        <CardContent className="p-4">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <h3 className="font-semibold">{event.title}</h3>

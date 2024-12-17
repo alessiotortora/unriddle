@@ -25,7 +25,7 @@ export async function createProject(formData: { spaceId: string }) {
         .values({
           contentId: contentResult.id,
           year: new Date().getFullYear(),
-          featured: false,
+          featured: true,
           details: {},
         })
         .returning({ id: projects.id });

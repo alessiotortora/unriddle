@@ -3,7 +3,7 @@
 import { eq } from 'drizzle-orm';
 
 import { db } from '@/db';
-import { socialLinks, users } from '@/db/schema';
+import { SocialLinks, socialLinks, users } from '@/db/schema';
 
 export async function updateUser(
   userId: string,
@@ -32,10 +32,22 @@ export async function updateUser(
         bio: data.bio,
         location: data.location,
         apiKey: data.apiKey,
-        socialLinks: data.socialLinks ? [data.socialLinks] : null,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
+
+    if (data.socialLinks) {
+      await db
+        .insert(socialLinks)
+        .values({
+          userId,
+          ...data.socialLinks,
+        })
+        .onConflictDoUpdate({
+          target: [socialLinks.userId],
+          set: data.socialLinks,
+        });
+    }
 
     return { success: true };
   } catch (error) {

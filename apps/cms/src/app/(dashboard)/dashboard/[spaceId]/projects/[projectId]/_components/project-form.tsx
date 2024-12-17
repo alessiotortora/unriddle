@@ -104,7 +104,7 @@ export default function ProjectForm({
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear - i);
   const formattedUpdatedAt = projectData?.updatedAt
-    ? format(new Date(projectData.updatedAt), 'MM/dd/yyyy') // Using `MM/dd/yyyy` format
+    ? format(new Date(projectData.updatedAt), 'dd/MM/yyyy') // Using `MM/dd/yyyy` format
     : 'N/A';
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(formSchema),
@@ -114,7 +114,7 @@ export default function ProjectForm({
       year: projectData?.year || currentYear,
       tags: projectData?.content?.tags || [],
       status: projectData?.content?.status || 'draft',
-      featured: projectData?.featured ?? false,
+      featured: projectData?.featured ?? true,
       details: isRecordOfString(projectData?.details)
         ? projectData.details
         : null,
@@ -222,45 +222,45 @@ export default function ProjectForm({
 
   return (
     <>
-      <div>
-        <Form {...form}>
-          <form className="flex w-full flex-col gap-6">
-            <MemoizedCoverSection
-              control={form.control}
-              images={images}
-              videos={videos}
-              setValue={setValue}
-            />
-            <div className="md:mx-8">
-              <div className="flex justify-between gap-2">
-                {/* Name Field */}
+      <Form {...form}>
+        <form className="space-y-8">
+          <MemoizedCoverSection
+            control={form.control}
+            images={images}
+            videos={videos}
+            setValue={setValue}
+          />
+
+          <div className="mx-auto max-w-3xl space-y-8">
+            <div className="flex w-full gap-4 md:flex-row">
+              <div className="flex-1">
                 <FormField
                   control={form.control}
                   name="title"
                   render={({ field }) => (
-                    <FormItem className="w-1/2">
+                    <FormItem>
                       <FormLabel>Title</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder={'Enter project title'}
+                          placeholder="Project name"
                           {...field}
                           value={field.value || ''}
                         />
                       </FormControl>
                       <FormDescription>
-                        Enter the name of the project
+                        Name your project clearly.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                {/* Year Field */}
+              </div>
+              <div className="flex-1">
                 <FormField
                   control={form.control}
                   name="year"
                   render={({ field }) => (
-                    <FormItem className="w-1/2">
+                    <FormItem>
                       <FormLabel>Year</FormLabel>
                       <FormControl>
                         <Select
@@ -291,163 +291,158 @@ export default function ProjectForm({
                   )}
                 />
               </div>
-
-              {/* Description Field */}
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        placeholder="Enter project description"
-                        className="w-full rounded-md border border-gray-300 p-2"
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Provide a brief description of the project.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Tags Field */}
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tags</FormLabel>
-                    <FormControl>
-                      <TagInput
-                        {...field}
-                        placeholder="e.g., design, marketing, video, software"
-                        tags={tags}
-                        className="sm:min-w-[450px]"
-                        setTags={(newTags) => {
-                          setTags(newTags);
-                          setValue('tags', newTags as [string, ...string[]]);
-                        }}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Add keywords that describe your project. This will help
-                      others find it. Example tags could include: industry, type
-                      of work, or technology used.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Featured Field */}
-              <FormField
-                control={form.control}
-                name="featured"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Featured</FormLabel>
-                    <FormControl>
-                      <div className="flex items-center justify-start gap-2">
-                        <Checkbox
-                          checked={field.value ?? false}
-                          onCheckedChange={field.onChange}
-                        />
-                        <Label className="text-foreground">
-                          Mark as Featured
-                        </Label>
-                      </div>
-                    </FormControl>
-                    <FormDescription>
-                      Mark this project as a featured item. Featured projects
-                      are highlighted for better visibility.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Details Field */}
-              <FormField
-                control={form.control}
-                name="details"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Details</FormLabel>
-                    <FormControl>
-                      <DetailsInput
-                        details={details}
-                        setDetails={(newDetails) => {
-                          setDetails(newDetails);
-                          field.onChange(newDetails);
-                        }}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Add any extra information in key-value pairs. Examples:
-                      Technology - React.js, Medium - Video.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Replace Media Items Field with MediaSection */}
-              <MemoizedMediaSection
-                control={form.control}
-                initialMedia={[
-                  ...(projectData?.content?.imagesToContent || []).map(
-                    (image: ImagesToContent & { image: ImageType }) => ({
-                      id: image.image.id,
-                      type: 'url' as const,
-                      value: image.image.url,
-                    }),
-                  ),
-                  ...(projectData?.content?.videosToContent || []).map(
-                    (video: VideosToContent & { video: VideoType }) => ({
-                      id: video.video.id,
-                      type: 'playbackId' as const,
-                      value: video.video.playbackId,
-                    }),
-                  ),
-                ]}
-                images={images}
-                videos={videos}
-              />
             </div>
-            {/* Submit Buttons */}
-            <div className="mt-8 flex items-center justify-between space-x-4">
-              {projectData && (
-                <p className="text-muted-foreground text-xs">
-                  Last Updated: {formattedUpdatedAt}
-                </p>
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Brief project description"
+                      className="w-full rounded-md border border-gray-300 p-2"
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Describe your project's purpose and outcome.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
               )}
-              <div className="flex gap-x-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={form.handleSubmit((values) =>
-                    handleSubmit(values, 'draft'),
-                  )}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Saving...' : 'Save'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="default"
-                  onClick={form.handleSubmit((values) =>
-                    handleSubmit(values, 'published'),
-                  )}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Publishing...' : 'Save and Publish'}
-                </Button>
-              </div>
+            />
+
+            <FormField
+              control={form.control}
+              name="tags"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tags</FormLabel>
+                  <FormControl>
+                    <TagInput
+                      {...field}
+                      placeholder="Add tags"
+                      tags={tags}
+                      className="sm:min-w-[450px]"
+                      setTags={(newTags) => {
+                        setTags(newTags);
+                        setValue('tags', newTags as [string, ...string[]]);
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Keywords to help find your project.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="details"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Details</FormLabel>
+                  <FormControl>
+                    <DetailsInput
+                      details={details}
+                      setDetails={(newDetails) => {
+                        setDetails(newDetails);
+                        field.onChange(newDetails);
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Add key project details as pairs.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <MemoizedMediaSection
+              control={form.control}
+              initialMedia={[
+                ...(projectData?.content?.imagesToContent || []).map(
+                  (image: ImagesToContent & { image: ImageType }) => ({
+                    id: image.image.id,
+                    type: 'url' as const,
+                    value: image.image.url,
+                  }),
+                ),
+                ...(projectData?.content?.videosToContent || []).map(
+                  (video: VideosToContent & { video: VideoType }) => ({
+                    id: video.video.id,
+                    type: 'playbackId' as const,
+                    value: video.video.playbackId,
+                  }),
+                ),
+              ]}
+              images={images}
+              videos={videos}
+            />
+
+            <FormField
+              control={form.control}
+              name="featured"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Featured</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center justify-start gap-2">
+                      <Checkbox
+                        checked={field.value ?? true}
+                        onCheckedChange={field.onChange}
+                      />
+                      <Label className="text-foreground">
+                        Mark as Featured
+                      </Label>
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Mark this project as a featured item. Featured projects are
+                    highlighted for better visibility.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="flex items-center justify-between pt-10">
+            {projectData && (
+              <p className="text-muted-foreground text-xs">
+                Last Updated: {formattedUpdatedAt}
+              </p>
+            )}
+            <div className="flex space-x-4">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={form.handleSubmit((values) =>
+                  handleSubmit(values, 'draft'),
+                )}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Saving...' : 'Save as Draft'}
+              </Button>
+              <Button
+                type="button"
+                variant="default"
+                onClick={form.handleSubmit((values) =>
+                  handleSubmit(values, 'published'),
+                )}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Publishing...' : 'Publish'}
+              </Button>
             </div>
-          </form>
-        </Form>
-      </div>
+          </div>
+        </form>
+      </Form>
     </>
   );
 }

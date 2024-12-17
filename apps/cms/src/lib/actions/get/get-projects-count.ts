@@ -7,8 +7,8 @@ import { db } from '@/db';
 import { content, projects } from '@/db/schema';
 
 export async function getProjectsCount(spaceId: string) {
-  if (!validate(spaceId)) {
-    console.error('Invalid UUID format for spaceId:', spaceId);
+  if (!spaceId || !validate(spaceId)) {
+    console.error('Invalid or missing spaceId:', spaceId);
     return {
       total: 0,
       published: 0,
@@ -16,16 +16,22 @@ export async function getProjectsCount(spaceId: string) {
   }
 
   try {
-    const [{ count: totalCount }] = await db
-      .select({ count: count() })
+    // Get total count
+    const [totalResult] = await db
+      .select({
+        value: count(projects.id),
+      })
       .from(projects)
       .innerJoin(content, eq(projects.contentId, content.id))
       .where(
         and(eq(content.spaceId, spaceId), eq(content.contentType, 'project')),
       );
 
-    const [{ count: publishedCount }] = await db
-      .select({ count: count() })
+    // Get published count
+    const [publishedResult] = await db
+      .select({
+        value: count(projects.id),
+      })
       .from(projects)
       .innerJoin(content, eq(projects.contentId, content.id))
       .where(
@@ -37,8 +43,8 @@ export async function getProjectsCount(spaceId: string) {
       );
 
     return {
-      total: totalCount,
-      published: publishedCount,
+      total: totalResult?.value ?? 0,
+      published: publishedResult?.value ?? 0,
     };
   } catch (error) {
     console.error('Error fetching project counts:', error);

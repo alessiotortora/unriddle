@@ -197,7 +197,8 @@ export function EventForm({ eventData, images }: EventFormProps) {
           setValue={form.setValue}
           imagesOnly={true}
         />
-        <div className="grid grid-cols-2 gap-6">
+
+        <div className="mx-auto max-w-3xl space-y-8">
           <FormField
             control={form.control}
             name="title"
@@ -205,15 +206,115 @@ export function EventForm({ eventData, images }: EventFormProps) {
               <FormItem>
                 <FormLabel>Title</FormLabel>
                 <FormControl>
-                  <Input placeholder="Event title" {...field} />
+                  <Input placeholder="Summer Design Workshop" {...field} />
                 </FormControl>
                 <FormDescription>
-                  The title of your event (max 256 characters).
+                  Name your event clearly and concisely.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="client"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Client</FormLabel>
+                <FormControl>
+                  <Input placeholder="Client name" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Organization or partner for this event.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Brief description of your event"
+                    {...field}
+                    value={field.value || ''}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Describe what attendees can expect.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="startDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Start Date</FormLabel>
+                <DateTimePicker
+                  date={field.value.date}
+                  setDate={(newDate) => {
+                    field.onChange({ ...field.value, date: newDate });
+                    form.trigger('endDate');
+                  }}
+                />
+                <FormDescription>
+                  Select when your event begins. This will be displayed to
+                  attendees and used for scheduling.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="endDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>End Date</FormLabel>
+                <DateTimePicker
+                  date={field.value.date}
+                  setDate={(newDate) => {
+                    field.onChange({ ...field.value, date: newDate });
+                    form.trigger('endDate');
+                  }}
+                />
+                <FormDescription>
+                  Select when your event ends. Make sure it's after the start
+                  date and includes any post-event activities.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Location</FormLabel>
+                <FormControl>
+                  <Input placeholder="Venue or Online" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Where the event will take place.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="type"
@@ -226,7 +327,7 @@ export function EventForm({ eventData, images }: EventFormProps) {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select event type" />
+                      <SelectValue placeholder="Select the type of event" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -237,100 +338,15 @@ export function EventForm({ eventData, images }: EventFormProps) {
                     ))}
                   </SelectContent>
                 </Select>
+                <FormDescription>
+                  Categorize your event to help attendees understand its format
+                  and purpose. This helps with filtering and discovery.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Event description"
-                  {...field}
-                  value={field.value || ''}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="startDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Start Date & Time</FormLabel>
-                <DateTimePicker
-                  date={field.value.date}
-                  setDate={(newDate) => {
-                    field.onChange({ ...field.value, date: newDate });
-                    form.trigger('endDate');
-                  }}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="endDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>End Date & Time</FormLabel>
-                <DateTimePicker
-                  date={field.value.date}
-                  setDate={(newDate) => {
-                    field.onChange({ ...field.value, date: newDate });
-                    form.trigger('endDate');
-                  }}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location</FormLabel>
-                <FormControl>
-                  <Input placeholder="Event location" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="client"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Client</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="External collaborator/organization"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="link"
@@ -338,18 +354,21 @@ export function EventForm({ eventData, images }: EventFormProps) {
               <FormItem>
                 <FormLabel>External Link</FormLabel>
                 <FormControl>
-                  <Input placeholder="https://example.com" {...field} />
+                  <Input placeholder="Registration or event link" {...field} />
                 </FormControl>
+                <FormDescription>
+                  Link to event details or registration.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="flex justify-end space-x-4">
+        <div className="flex justify-end space-x-4 pt-10">
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={() => onSubmit(form.getValues(), true)}
           >
             Save as Draft
