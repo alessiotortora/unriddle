@@ -21,7 +21,7 @@ export async function updateUser(
       website: string | null;
       other: string | null;
     } | null;
-  },
+  }
 ) {
   try {
     await db

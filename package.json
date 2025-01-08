@@ -2,9 +2,7 @@
   "name": "unriddle",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "apps/*"
-  ],
+  "workspaces": ["apps/*"],
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -12,7 +10,7 @@
     "format": "biome format --write .",
     "check": "biome check ."
   },
-  "packageManager": "yarn@1.22.22",
+  "packageManager": "bun@1.1.43",
   "devDependencies": {
     "@biomejs/biome": "1.5.3",
     "turbo": "^2.3.0"
