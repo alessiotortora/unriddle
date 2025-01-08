@@ -9,10 +9,12 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "format": "turbo run format"
+    "format": "biome format --write .",
+    "check": "biome check ."
   },
   "packageManager": "yarn@1.22.22",
   "devDependencies": {
+    "@biomejs/biome": "1.5.3",
     "turbo": "^2.3.0"
   }
 }

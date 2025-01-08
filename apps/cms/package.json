@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "format": "prettier src/ --write",
+    "lint": "next lint && biome lint src/",
+    "format": "biome format src/ --write",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -61,7 +61,6 @@
     "zustand": "^5.0.1"
   },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/node": "^22.8.6",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
@@ -71,8 +70,6 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-check-file": "^2.8.0",
     "postcss": "^8",
-    "prettier": "^3.3.3",
-    "prettier-plugin-tailwindcss": "^0.6.8",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.1",
     "typescript": "^5"
