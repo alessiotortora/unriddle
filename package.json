@@ -10,7 +10,7 @@
     "format": "biome format --write .",
     "check": "biome check ."
   },
-  "packageManager": "bun@1.1.43",
+  "packageManager": "yarn@1.22.22",
   "devDependencies": {
     "@biomejs/biome": "1.5.3",
     "turbo": "^2.3.0"
