@@ -8,11 +8,14 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "format": "biome format --write .",
-    "check": "biome check ."
+    "check": "biome check .",
+    "clean": "pnpm recursive exec rm -rf dist node_modules"
   },
-  "packageManager": "yarn@1.22.22",
+  "packageManager": "pnpm@9.15.3",
   "devDependencies": {
     "@biomejs/biome": "1.5.3",
-    "turbo": "^2.3.0"
+    "turbo": "^2.3.3",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5"
   }
 }
