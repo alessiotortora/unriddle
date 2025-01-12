@@ -3,6 +3,7 @@
 import { db } from '@/db';
 import { images } from '@/db/schema/images';
 import { NewImage } from '@/db/schema/images';
+import { revalidatePath } from 'next/cache';
 
 interface ImageInput {
   publicId: string;
@@ -34,10 +35,10 @@ export async function createImage(imageInputs: ImageInput[], spaceId: string) {
       updatedAt: new Date(),
     }));
 
-    const newImages = await db
-      .insert(images)
-      .values(imagesToInsert)
-      .returning();
+    const newImages = await db.insert(images).values(imagesToInsert).returning();
+
+    // Revalidate the path after images are created
+    revalidatePath(`/dashboard/${spaceId}/projects/[projectId]`, 'page');
 
     return {
       message: 'Images inserted successfully',

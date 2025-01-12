@@ -1,13 +1,8 @@
 import { useEffect, useRef } from 'react';
 
-import { useRouter } from 'next/navigation';
-
 import { createClient } from '@/utils/supabase/client';
 
-export function useRealtime(
-  channelName: string,
-  onEvent: (payload: any) => void,
-) {
+export function useRealtime(channelName: string, onEvent: (payload: any) => void) {
   const supabase = createClient();
   const callbackRef = useRef(onEvent);
 
@@ -18,15 +13,11 @@ export function useRealtime(
   useEffect(() => {
     const channel = supabase
       .channel(channelName)
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'videos' },
-        (payload) => {
-          if (callbackRef.current) {
-            callbackRef.current(payload);
-          }
-        },
-      )
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'videos' }, (payload) => {
+        if (callbackRef.current) {
+          callbackRef.current(payload);
+        }
+      })
       .subscribe();
 
     return () => {

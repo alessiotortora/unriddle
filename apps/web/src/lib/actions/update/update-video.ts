@@ -12,7 +12,7 @@ export async function updateVideo(
   videoId: string,
   identifier: string,
   duration: number,
-  aspectRatio: string,
+  aspectRatio: string
 ) {
   try {
     const existingVideo = await db.query.videos.findFirst({
@@ -34,9 +34,6 @@ export async function updateVideo(
         updatedAt: new Date(),
       })
       .where(eq(videos.identifier, identifier));
-
-    // Revalidate the path after video is updated
-    revalidatePath(`/${existingVideo.spaceId}/media`, 'layout');
   } catch (error) {
     console.error('Error updating video:', error);
     throw new Error('Failed to update video');

@@ -28,10 +28,10 @@ export type ProjectWithRelations = Project & {
 export default async function ProjectPage({
   params,
 }: {
-  params: Promise<{ spaceId: string; projectId: string }>;
+  params: { spaceId: string; projectId: string };
 }) {
-  const projectId = (await params).projectId;
-  const spaceId = (await params).spaceId;
+  const projectId = params.projectId;
+  const spaceId = params.spaceId;
   const [project, mediaItems] = await Promise.all([
     getProject(projectId) as Promise<ProjectWithRelations | null>,
     getMedia(spaceId),
@@ -39,11 +39,7 @@ export default async function ProjectPage({
 
   return (
     <PageContainer scrollable={true}>
-      <ProjectForm
-        projectData={project}
-        images={mediaItems.images}
-        videos={mediaItems.videos}
-      />
+      <ProjectForm projectData={project} images={mediaItems.images} videos={mediaItems.videos} />
     </PageContainer>
   );
 }

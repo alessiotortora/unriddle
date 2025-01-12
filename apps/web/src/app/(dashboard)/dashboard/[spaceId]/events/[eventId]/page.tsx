@@ -7,19 +7,15 @@ import { EventForm } from './_components/event-form';
 export default async function EventPage({
   params,
 }: {
-  params: Promise<{ spaceId: string; eventId: string }>;
+  params: { spaceId: string; eventId: string };
 }) {
-  const eventId = (await params).eventId;
-  const spaceId = (await params).spaceId;
+  const eventId = params.eventId;
+  const spaceId = params.spaceId;
 
-  const [event, mediaItems] = await Promise.all([
-    getEvent(eventId),
-    getMedia(spaceId),
-  ]);
+  const [event, mediaItems] = await Promise.all([getEvent(eventId), getMedia(spaceId)]);
   return (
     <PageContainer scrollable={true}>
       <EventForm eventData={event} images={mediaItems.images} />
     </PageContainer>
   );
 }
- 

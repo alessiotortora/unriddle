@@ -214,25 +214,28 @@ export const MediaSelector = ({
         <TabsContent value="videos">
           <ScrollArea className={cn('h-[300px]', isMobile && 'h-[60vh]')}>
             <div className="mx-auto mt-5 flex flex-wrap justify-center gap-1 p-1 sm:gap-2 sm:p-0">
-              {videos?.map((video) => (
-                <Suspense key={video.id} fallback={<LoadingSpinner />}>
-                  <MediaThumbnail
-                    id={video.id}
-                    type="playbackId"
-                    itemValue={video.playbackId || ''}
-                    thumbnailUrl={
-                      video.playbackId
-                        ? `https://image.mux.com/${video.playbackId}/thumbnail.webp`
-                        : ''
-                    }
-                    isSelected={value.some(
-                      (item) => item.type === 'playbackId' && item.value === video.playbackId
-                    )}
-                    onToggle={toggleMediaItem}
-                    isPending={!video.playbackId}
-                  />
-                </Suspense>
-              ))}
+              {videos?.map((video) => {
+                console.log(videos.length);
+                return (
+                  <Suspense key={video.id} fallback={<LoadingSpinner />}>
+                    <MediaThumbnail
+                      id={video.id}
+                      type="playbackId"
+                      itemValue={video.playbackId || ''}
+                      thumbnailUrl={
+                        video.playbackId
+                          ? `https://image.mux.com/${video.playbackId}/thumbnail.webp`
+                          : ''
+                      }
+                      isSelected={value.some(
+                        (item) => item.type === 'playbackId' && item.value === video.playbackId
+                      )}
+                      onToggle={toggleMediaItem}
+                      isPending={!video.playbackId}
+                    />
+                  </Suspense>
+                );
+              })}
             </div>
           </ScrollArea>
         </TabsContent>

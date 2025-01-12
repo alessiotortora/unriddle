@@ -9,9 +9,9 @@ import { DashboardCard } from '../_components/dashboard-card';
 export default async function SpaceDashboardPage({
   params,
 }: {
-  params: Promise<{ spaceId: string }>;
+  params: { spaceId: string };
 }) {
-  const spaceId = (await params).spaceId;
+  const spaceId = params.spaceId;
   const projectMetrics = await getProjectsCount(spaceId);
   const eventMetrics = await getEventsCount(spaceId);
 
