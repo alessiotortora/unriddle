@@ -1,28 +1,30 @@
 'use server';
 
 import { eq } from 'drizzle-orm';
+import { cache } from 'react';
 
 import { db } from '@/db';
 import { users } from '@/db/schema';
-import { createClient } from '@/utils/supabase/server';
+import { getServerUser } from '@/utils/supabase/server';
 
-export async function getUser() {
-  const supabase = await createClient();
-  const {
-    data: { user: authUser },
-    error,
-  } = await supabase.auth.getUser();
+export const getUser = cache(async (options?: { includeSocialLinks?: boolean }) => {
+  const authUser = await getServerUser();
 
-  if (error || !authUser) return null;
+  if (!authUser) return null;
+
+  if (options?.includeSocialLinks) {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, authUser.id),
+      with: {
+        socialLinks: true,
+      },
+    });
+    return user ?? null;
+  }
 
   const user = await db.query.users.findFirst({
     where: eq(users.id, authUser.id),
-    with: {
-      socialLinks: true,
-    },
   });
 
-  if (!user) return null;
-
-  return user;
-}
+  return user ?? null;
+});

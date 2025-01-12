@@ -14,11 +14,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Image as Images, Video } from '@/db/schema';
@@ -44,7 +40,7 @@ interface MediaSelectorProps {
       type: 'url' | 'playbackId';
       value: string | null;
       identifier?: string;
-    }[],
+    }[]
   ) => void;
   maxSelection?: number;
   title: string;
@@ -83,7 +79,7 @@ export const MediaSelector = ({
   }, [value]);
 
   const handleVideoUpdate = useCallback(
-    (payload: any) => {
+    (payload: { new: { playback_id: string | null; identifier: string } }) => {
       const updatedVideo = payload.new;
 
       if (updatedVideo.playback_id) {
@@ -99,16 +95,14 @@ export const MediaSelector = ({
         });
 
         // Check for changes
-        const hasChanges = updatedValue.some(
-          (item, index) => item !== valueRef.current[index],
-        );
+        const hasChanges = updatedValue.some((item, index) => item !== valueRef.current[index]);
 
         if (hasChanges) {
           onChange(updatedValue);
         }
       }
     },
-    [onChange],
+    [onChange]
   );
 
   useRealtime(`videos-${id}`, handleVideoUpdate);
@@ -127,16 +121,14 @@ export const MediaSelector = ({
       }
 
       const exists = value.some(
-        (item) =>
-          item.type === mediaItem.type && item.value === mediaItem.value,
+        (item) => item.type === mediaItem.type && item.value === mediaItem.value
       );
 
-      let newMediaItems;
+      let newMediaItems: typeof value;
 
       if (exists) {
         newMediaItems = value.filter(
-          (item) =>
-            !(item.type === mediaItem.type && item.value === mediaItem.value),
+          (item) => !(item.type === mediaItem.type && item.value === mediaItem.value)
         );
       } else {
         if (maxSelection && value.length >= maxSelection) {
@@ -156,7 +148,7 @@ export const MediaSelector = ({
 
       onChange(newMediaItems);
     },
-    [value, maxSelection, onChange],
+    [value, maxSelection, onChange]
   );
 
   const handleUploadComplete = (
@@ -165,14 +157,14 @@ export const MediaSelector = ({
       type: 'url' | 'playbackId';
       value: string | null;
       identifier?: string;
-    }[],
+    }[]
   ) => {
     if (maxSelection === 1) {
       onChange(items);
     } else {
       const newItems = [...(value || [])];
 
-      items.forEach((item) => {
+      for (const item of items) {
         const exists = newItems.some((existing) => {
           const isDuplicate =
             existing.identifier !== undefined && item.identifier !== undefined
@@ -185,7 +177,7 @@ export const MediaSelector = ({
         if (!exists) {
           newItems.push(item);
         }
-      });
+      }
 
       onChange(newItems.slice(0, maxSelection));
     }
@@ -195,12 +187,7 @@ export const MediaSelector = ({
 
   const MediaContent = () => (
     <Tabs defaultValue="images" value={activeTab} onValueChange={setActiveTab}>
-      <TabsList
-        className={cn(
-          'grid w-full',
-          imagesOnly ? 'grid-cols-2' : 'grid-cols-3',
-        )}
-      >
+      <TabsList className={cn('grid w-full', imagesOnly ? 'grid-cols-2' : 'grid-cols-3')}>
         <TabsTrigger value="images">Images</TabsTrigger>
         {!imagesOnly && <TabsTrigger value="videos">Videos</TabsTrigger>}
         <TabsTrigger value="upload">Upload New</TabsTrigger>
@@ -215,9 +202,7 @@ export const MediaSelector = ({
                   type="url"
                   itemValue={image.url}
                   thumbnailUrl={image.url}
-                  isSelected={value.some(
-                    (item) => item.type === 'url' && item.value === image.url,
-                  )}
+                  isSelected={value.some((item) => item.type === 'url' && item.value === image.url)}
                   onToggle={toggleMediaItem}
                 />
               </Suspense>
@@ -241,9 +226,7 @@ export const MediaSelector = ({
                         : ''
                     }
                     isSelected={value.some(
-                      (item) =>
-                        item.type === 'playbackId' &&
-                        item.value === video.playbackId,
+                      (item) => item.type === 'playbackId' && item.value === video.playbackId
                     )}
                     onToggle={toggleMediaItem}
                     isPending={!video.playbackId}
@@ -274,10 +257,7 @@ export const MediaSelector = ({
             <Button
               variant={variant}
               size="sm"
-              className={cn(
-                'gap-1',
-                variant === 'ghost' ? 'text-muted-foreground' : '',
-              )}
+              className={cn('gap-1', variant === 'ghost' ? 'text-muted-foreground' : '')}
             >
               {!hasSelection && <ImageIcon />}
               {title} {maxSelection > 1 && `${value.length}/${maxSelection}`}
@@ -297,20 +277,13 @@ export const MediaSelector = ({
             <Button
               variant={variant}
               size="sm"
-              className={cn(
-                'gap-1',
-                variant === 'ghost' ? 'text-muted-foreground' : '',
-              )}
+              className={cn('gap-1', variant === 'ghost' ? 'text-muted-foreground' : '')}
             >
               {!hasSelection && <ImageIcon />}
               {title} {maxSelection > 1 && `${value.length}/${maxSelection}`}
             </Button>
           </PopoverTrigger>
-          <PopoverContent
-            side={side}
-            className="w-screen max-w-3xl p-4 md:w-[80vw]"
-            align="center"
-          >
+          <PopoverContent side={side} className="w-screen max-w-3xl p-4 md:w-[80vw]" align="center">
             <div className="w-full">
               <MediaContent />
             </div>
@@ -322,8 +295,8 @@ export const MediaSelector = ({
         <div className="mt-4">
           <p>Selected Media Items:</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-            {value.map((item, index) => (
-              <Suspense key={index} fallback={<LoadingSpinner />}>
+            {value.map((item) => (
+              <Suspense key={`${item.type}-${item.id || item.value}`} fallback={<LoadingSpinner />}>
                 {!item.value || (item.type === 'playbackId' && !item.value) ? (
                   <LoadingSpinner />
                 ) : (
@@ -336,11 +309,7 @@ export const MediaSelector = ({
                       }
                       fill
                       sizes="(max-width: 768px) 50vw, 33vw"
-                      alt={
-                        item.type === 'url'
-                          ? 'Selected Image'
-                          : 'Selected Video'
-                      }
+                      alt={item.type === 'url' ? 'Selected Image' : 'Selected Video'}
                       className="rounded-md object-cover"
                     />
                   </div>
@@ -383,11 +352,18 @@ const MediaThumbnail = ({
   return (
     <div
       onClick={() => onToggle({ type, value: itemValue, id: id })}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onToggle({ type, value: itemValue, id: id });
+        }
+      }}
+      tabIndex={0}
+      role="button"
       className={cn(
         'group relative aspect-video cursor-pointer overflow-hidden rounded-md',
         'w-[calc(50%-0.5rem)] min-w-[100px] max-w-[200px]',
         'sm:w-[calc(33%-0.5rem)]',
-        'md:w-[calc(25%-0.5rem)]',
+        'md:w-[calc(25%-0.5rem)]'
       )}
     >
       <Image
@@ -400,13 +376,13 @@ const MediaThumbnail = ({
       <div
         className={cn(
           'absolute inset-0 bg-black/10 transition-opacity',
-          isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+          isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         )}
       />
       <div
         className={cn(
           'bg-primary absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full shadow-md transition-transform',
-          isSelected ? 'scale-100' : 'scale-0 group-hover:scale-100',
+          isSelected ? 'scale-100' : 'scale-0 group-hover:scale-100'
         )}
       >
         <Check className="text-primary-foreground h-3.5 w-3.5" />

@@ -24,10 +24,7 @@ export default async function SpaceDashboardPage({
   return (
     <PageContainer scrollable={false}>
       <div className="flex h-full flex-col space-y-8">
-        <Heading
-          title="Dashboard"
-          description="Overview of your portfolio content"
-        />
+        <Heading title="Dashboard" description="Overview of your portfolio content" />
         <section aria-label="Dashboard Metrics">
           <DashboardCard metrics={metrics} />
         </section>

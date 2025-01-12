@@ -30,17 +30,13 @@ interface FileUploaderProps {
       type: 'url' | 'playbackId';
       value: string | null;
       identifier?: string;
-    }[],
+    }[]
   ) => void;
   maxFiles?: number;
   imagesOnly?: boolean;
 }
 
-function FileUploader({
-  onUploadComplete,
-  maxFiles = 5,
-  imagesOnly = false,
-}: FileUploaderProps) {
+function FileUploader({ onUploadComplete, maxFiles = 5, imagesOnly = false }: FileUploaderProps) {
   const params = useParams();
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,7 +51,7 @@ function FileUploader({
       ...acceptedFiles.map((file) =>
         Object.assign(file, {
           preview: URL.createObjectURL(file),
-        }),
+        })
       ),
     ]);
   }, []);
@@ -65,14 +61,15 @@ function FileUploader({
     accept: imagesOnly ? { 'image/*': [] } : { 'image/*': [], 'video/*': [] },
     maxFiles: maxFiles,
     multiple: maxFiles > 1,
-    onDropRejected: () =>
-      setError('File rejected. Please ensure the file is an image or video.'),
+    onDropRejected: () => setError('File rejected. Please ensure the file is an image or video.'),
     disabled: loading, // Disable dropzone while loading
   });
 
   useEffect(() => {
     return () => {
-      files.forEach((file) => URL.revokeObjectURL(file.preview));
+      for (const file of files) {
+        URL.revokeObjectURL(file.preview);
+      }
     };
   }, [files]);
 
@@ -98,8 +95,8 @@ function FileUploader({
     const imageFiles = files.filter((file) => file.type.startsWith('image/'));
     const videoFiles = files.filter((file) => file.type.startsWith('video/'));
 
-    const uploadPromise: Promise<SonnerProps> = new Promise(
-      async (resolve, reject) => {
+    const uploadPromise: Promise<SonnerProps> = new Promise((resolve, reject) => {
+      (async () => {
         try {
           if (imageFiles.length > 0) {
             const results = await uploadToCloudinary(imageFiles);
@@ -115,35 +112,28 @@ function FileUploader({
               format: result.format,
             }));
 
-            const result = await createImage(
-              imagesToSave,
-              params.spaceId as string,
-            );
+            const result = await createImage(imagesToSave, params.spaceId as string);
 
             uploadedItems.push(
               ...result.images.map((r) => ({
                 id: r.id,
                 type: 'url' as const,
                 value: r.url,
-              })),
+              }))
             );
           }
 
           if (videoFiles.length > 0) {
-            if (!videoFiles)
-              throw new Error('No video files provided for upload');
+            if (!videoFiles) throw new Error('No video files provided for upload');
 
-            const results = await uploadToMux(
-              videoFiles,
-              params.spaceId as string,
-            );
+            const results = await uploadToMux(videoFiles, params.spaceId as string);
             uploadedItems.push(
               ...results.map((r) => ({
                 id: r.id,
                 type: 'playbackId' as const,
                 value: null,
                 identifier: r.identifier,
-              })),
+              }))
             );
           }
 
@@ -154,8 +144,8 @@ function FileUploader({
         } finally {
           setLoading(false);
         }
-      },
-    );
+      })();
+    });
     toast.promise(uploadPromise, {
       loading: 'Uploading...',
       success: (data: SonnerProps) => {
@@ -170,7 +160,9 @@ function FileUploader({
   return (
     <div className="flex min-h-full flex-col items-end">
       <div
-        className={`flex h-full w-full cursor-pointer items-center justify-center border border-dashed p-20 outline-none ${loading ? 'opacity-50' : ''}`}
+        className={`flex h-full w-full cursor-pointer items-center justify-center border border-dashed p-20 outline-none ${
+          loading ? 'opacity-50' : ''
+        }`}
       >
         <div {...getRootProps()} className="text-center">
           <input {...getInputProps()} />
@@ -189,8 +181,7 @@ function FileUploader({
               <Upload size={36} strokeWidth={1.5} />
               <p className="dropzone">
                 Drag & drop {maxFiles > 1 ? `up to ${maxFiles} ` : ''}
-                {maxFiles > 1 ? 'images/videos' : 'an image/video'} here or
-                click to select
+                {maxFiles > 1 ? 'images/videos' : 'an image/video'} here or click to select
               </p>
             </div>
           )}

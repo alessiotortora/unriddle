@@ -1,12 +1,13 @@
 'use server';
 
-import { and, count, eq, gt } from 'drizzle-orm';
+import { count, eq, sql } from 'drizzle-orm';
+import { cache } from 'react';
 import { validate } from 'uuid';
 
 import { db } from '@/db';
 import { events } from '@/db/schema';
 
-export async function getEventsCount(spaceId: string) {
+export const getEventsCount = cache(async (spaceId: string) => {
   if (!spaceId || !validate(spaceId)) {
     console.error('Invalid or missing spaceId:', spaceId);
     return {
@@ -16,32 +17,21 @@ export async function getEventsCount(spaceId: string) {
   }
 
   try {
-    // Get total count
-    const [totalResult] = await db
+    const now = new Date().toISOString();
+    // Get both counts in a single query
+    const [result] = await db
       .select({
-        value: count(events.id),
+        total: count(events.id),
+        upcoming: count(
+          sql`CASE WHEN ${events.status} = 'scheduled' AND ${events.startDate}::timestamp > ${now}::timestamp THEN 1 END`
+        ),
       })
       .from(events)
       .where(eq(events.spaceId, spaceId));
 
-    // Get upcoming count
-    const now = new Date();
-    const [upcomingResult] = await db
-      .select({
-        value: count(events.id),
-      })
-      .from(events)
-      .where(
-        and(
-          eq(events.spaceId, spaceId),
-          eq(events.status, 'scheduled'),
-          gt(events.startDate, now),
-        ),
-      );
-
     return {
-      total: totalResult?.value ?? 0,
-      upcoming: upcomingResult?.value ?? 0,
+      total: result?.total ?? 0,
+      upcoming: result?.upcoming ?? 0,
     };
   } catch (error) {
     console.error('Error fetching event counts:', error);
@@ -50,4 +40,4 @@ export async function getEventsCount(spaceId: string) {
       upcoming: 0,
     };
   }
-}
+});

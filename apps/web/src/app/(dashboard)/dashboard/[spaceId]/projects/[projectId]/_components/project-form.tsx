@@ -68,7 +68,7 @@ const formSchema = z.object({
         id: z.string(),
         type: z.enum(['url', 'playbackId']),
         value: z.string(),
-      }),
+      })
     )
     .max(8)
     .nullable(),
@@ -78,7 +78,7 @@ const formSchema = z.object({
         id: z.string(),
         type: z.enum(['url', 'playbackId']),
         value: z.string(),
-      }),
+      })
     )
     .max(1)
     .nullable(),
@@ -89,16 +89,12 @@ const formSchema = z.object({
 const MemoizedCoverSection = React.memo(CoverSection);
 const MemoizedMediaSection = React.memo(MediaSection);
 
-export default function ProjectForm({
-  projectData,
-  images,
-  videos,
-}: ProjectFormProps) {
+export default function ProjectForm({ projectData, images, videos }: ProjectFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tags, setTags] = useState<string[]>(projectData?.content?.tags || []);
   const [details, setDetails] = useState<{ [key: string]: string }>(
-    isRecordOfString(projectData?.details) ? projectData.details : {},
+    isRecordOfString(projectData?.details) ? projectData.details : {}
   );
 
   const currentYear = new Date().getFullYear();
@@ -115,9 +111,7 @@ export default function ProjectForm({
       tags: projectData?.content?.tags || [],
       status: projectData?.content?.status || 'draft',
       featured: projectData?.featured ?? true,
-      details: isRecordOfString(projectData?.details)
-        ? projectData.details
-        : null,
+      details: isRecordOfString(projectData?.details) ? projectData.details : null,
       media: projectData?.content
         ? [
             ...(projectData.content.imagesToContent || []).map(
@@ -125,14 +119,14 @@ export default function ProjectForm({
                 id: image.image.id,
                 type: 'url' as const,
                 value: image.image.url || '',
-              }),
+              })
             ),
             ...(projectData.content.videosToContent || []).map(
               (video: VideosToContent & { video: VideoType }) => ({
                 id: video.video.id,
                 type: 'playbackId' as const,
                 value: video.video.playbackId || '',
-              }),
+              })
             ),
           ]
         : null,
@@ -168,7 +162,7 @@ export default function ProjectForm({
         return;
       }
 
-      const promise = new Promise(async (resolve, reject) => {
+      const promise = new Promise((resolve, reject) => {
         try {
           setIsSubmitting(true);
 
@@ -197,12 +191,17 @@ export default function ProjectForm({
             videos: videos ?? null,
           };
 
-          await updateProject(projectData.id, projectData.contentId, payload);
-          resolve(status);
+          updateProject(projectData.id, projectData.contentId, payload)
+            .then(() => {
+              resolve(status);
+            })
+            .catch(reject)
+            .finally(() => {
+              setIsSubmitting(false);
+            });
         } catch (error) {
-          reject(error);
-        } finally {
           setIsSubmitting(false);
+          reject(error);
         }
       });
 
@@ -217,7 +216,7 @@ export default function ProjectForm({
         error: 'Failed to save project',
       });
     },
-    [projectData, router],
+    [projectData, router, isSubmitting]
   );
 
   return (
@@ -241,15 +240,9 @@ export default function ProjectForm({
                     <FormItem>
                       <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Project name"
-                          {...field}
-                          value={field.value || ''}
-                        />
+                        <Input placeholder="Project name" {...field} value={field.value || ''} />
                       </FormControl>
-                      <FormDescription>
-                        Name your project clearly.
-                      </FormDescription>
+                      <FormDescription>Name your project clearly.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -264,12 +257,8 @@ export default function ProjectForm({
                       <FormLabel>Year</FormLabel>
                       <FormControl>
                         <Select
-                          onValueChange={(value) =>
-                            field.onChange(parseInt(value))
-                          }
-                          defaultValue={
-                            field.value?.toString() || currentYear.toString()
-                          }
+                          onValueChange={(value) => field.onChange(parseInt(value))}
+                          defaultValue={field.value?.toString() || currentYear.toString()}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select Year" />
@@ -306,9 +295,7 @@ export default function ProjectForm({
                       className="w-full rounded-md border border-gray-300 p-2"
                     />
                   </FormControl>
-                  <FormDescription>
-                    Describe your project's purpose and outcome.
-                  </FormDescription>
+                  <FormDescription>Describe your project's purpose and outcome.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -332,9 +319,7 @@ export default function ProjectForm({
                       }}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Keywords to help find your project.
-                  </FormDescription>
+                  <FormDescription>Keywords to help find your project.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -355,9 +340,7 @@ export default function ProjectForm({
                       }}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Add key project details as pairs.
-                  </FormDescription>
+                  <FormDescription>Add key project details as pairs.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -371,14 +354,14 @@ export default function ProjectForm({
                     id: image.image.id,
                     type: 'url' as const,
                     value: image.image.url,
-                  }),
+                  })
                 ),
                 ...(projectData?.content?.videosToContent || []).map(
                   (video: VideosToContent & { video: VideoType }) => ({
                     id: video.video.id,
                     type: 'playbackId' as const,
                     value: video.video.playbackId,
-                  }),
+                  })
                 ),
               ]}
               images={images}
@@ -393,18 +376,13 @@ export default function ProjectForm({
                   <FormLabel>Featured</FormLabel>
                   <FormControl>
                     <div className="flex items-center justify-start gap-2">
-                      <Checkbox
-                        checked={field.value ?? true}
-                        onCheckedChange={field.onChange}
-                      />
-                      <Label className="text-foreground">
-                        Mark as Featured
-                      </Label>
+                      <Checkbox checked={field.value ?? true} onCheckedChange={field.onChange} />
+                      <Label className="text-foreground">Mark as Featured</Label>
                     </div>
                   </FormControl>
                   <FormDescription>
-                    Mark this project as a featured item. Featured projects are
-                    highlighted for better visibility.
+                    Mark this project as a featured item. Featured projects are highlighted for
+                    better visibility.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -414,17 +392,13 @@ export default function ProjectForm({
 
           <div className="flex items-center justify-between pt-10">
             {projectData && (
-              <p className="text-muted-foreground text-xs">
-                Last Updated: {formattedUpdatedAt}
-              </p>
+              <p className="text-muted-foreground text-xs">Last Updated: {formattedUpdatedAt}</p>
             )}
             <div className="flex space-x-4">
               <Button
                 type="button"
                 variant="secondary"
-                onClick={form.handleSubmit((values) =>
-                  handleSubmit(values, 'draft'),
-                )}
+                onClick={form.handleSubmit((values) => handleSubmit(values, 'draft'))}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Saving...' : 'Save as Draft'}
@@ -432,9 +406,7 @@ export default function ProjectForm({
               <Button
                 type="button"
                 variant="default"
-                onClick={form.handleSubmit((values) =>
-                  handleSubmit(values, 'published'),
-                )}
+                onClick={form.handleSubmit((values) => handleSubmit(values, 'published'))}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Publishing...' : 'Publish'}
